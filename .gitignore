@@ -1,0 +1,11 @@
+# ignore everything
+*
+
+# now I whitelist what I want tracked
+!.gitignore
+
+!torresconfig.org
+!init.el
+!search_engines.el
+!*/
+

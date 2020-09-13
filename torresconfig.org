@@ -1,0 +1,239 @@
+* Torres emacs configuration
+
+* Settings
+
+  #+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Ricardo Torres"
+        user-mail-address "ricardojgtorres@gmail.com")
+  #+END_SRC
+
+** Windows configuration
+*** set a decent font in windows
+    # #+BEGIN_SRC emacs-lisp
+    #   (set-face-attribute 'default nil :family "Consolas" :height 110)
+    # #+END_SRC
+
+** general basic emacs configuration
+*** highlight current line
+    #+BEGIN_SRC emacs-lisp
+  (global-hl-line-mode 1)
+    #+END_SRC
+*** open without toolbar
+    #+BEGIN_SRC emacs-lisp
+  (tool-bar-mode -1)
+    #+END_SRC
+*** line numbers everywhere
+    #+BEGIN_SRC emacs-lisp
+  (global-display-line-numbers-mode)
+    #+END_SRC
+*** do word wrap in line instead of breaking words
+    #+BEGIN_SRC emacs-lisp
+    (global-visual-line-mode 1)
+    #+END_SRC
+*** start from scratch
+    #+BEGIN_SRC emacs-lisp
+    (setq inhibit-startup-message t
+	inhibit-startup-echo-area-message t)
+    #+END_SRC
+*** ido mode, helps with searching
+    it is disable currently due to the use of helm
+    # #+BEGIN_SRC emacs-lisp
+    #   (ido-mode 1)				;
+    #   (setq ido-enable-flex-matching t)
+    #   (setq ido-everywhere t)
+    # #+END_SRC
+*** auto-indent
+    #+BEGIN_SRC emacs-lisp
+    (define-key global-map (kbd "RET") 'newline-and-indent)
+    (setq-default tab-always-indent 'complete)
+    #+END_SRC
+*** y or n are sufficient
+    #+BEGIN_SRC emacs-lisp
+    (fset 'yes-or-no-p 'y-or-n-p)
+    #+END_SRC
+*** selection and deletion configuration
+    when you mark a region, you can delete it or replace it as in other Windows programs:
+    simply hit delete or type whatever you want or yank
+    #+BEGIN_SRC emacs-lisp
+    (delete-selection-mode)
+    #+END_SRC
+*** show the matching parentheses immediately
+    #+BEGIN_SRC emacs-lisp
+    (setq show-paren-delay 0)
+    (show-paren-mode 1)
+    #+END_SRC
+*** define cursor as bar
+    #+BEGIN_SRC emacs-lisp
+    (setq-default cursor-type 'bar)
+    #+END_SRC
+*** silence the bell, define error to be visual
+    #+BEGIN_SRC emacs-lisp
+    (setq visible-bell t)
+    #+END_SRC
+*** view column number
+    #+BEGIN_SRC emacs-lisp
+    (setq column-number-mode t)
+    #+END_SRC
+*** show time
+    #+BEGIN_SRC emacs-lisp
+    (setf display-time-24hr-format t)
+    (display-time-mode 1)
+    #+END_SRC
+*** define shortcuts to change visible buffers
+can be used with windmove-default-keybindings using S-arrows, but I do not like it
+    #+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "C-x C-<up>") 'windmove-up)
+    (global-set-key (kbd "C-x C-<down>") 'windmove-down)
+    (global-set-key (kbd "C-x C-<left>") 'windmove-left)
+    (global-set-key (kbd "C-x C-<right>") 'windmove-right)
+    #+END_SRC
+*** set window name as current buffer
+    #+BEGIN_SRC emacs-lisp
+    (setq-default frame-title-format '("%b [%m]"))
+    #+END_SRC
+
+
+** Packages
+ #   #*** Melpa and use-Package
+ #    Use-package is a handful of things: you can make sure a package is downloaded, efficiently configure it (e.g. after load, or as needed), bind keys in a concise way, and more.
+
+ # #+BEGIN_SRC emacs-lisp
+ #   (require 'package)
+ #   (setq package-archives
+ #         '(("gnu" . "https://elpa.gnu.org/packages/")
+ #           ("melpa" . "https://melpa.org/packages/")))
+ #   (setq load-prefer-newer t)
+ #   (unless (package-installed-p 'use-package)
+ #     (package-refresh-contents)
+ #     (package-install 'use-package))
+ #   (require 'use-package)
+ # #+END_SRC
+*** Customize look and feel
+**** All the icons
+package to display icons
+  #+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+  :ensure t)
+  #+END_SRC
+**** powerline
+  #+BEGIN_SRC emacs-lisp
+  (use-package powerline
+  :ensure t)
+  #+END_SRC
+**** moe theme
+my current theme, it has some minor changes compared to the origial, mainly the background is darker, and that is the reason why it does not have the ensure
+   #+BEGIN_SRC emacs-lisp
+   (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
+   (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
+   (use-package moe-theme
+   :init
+   (load-theme 'moe-dark t)
+   :config
+   (powerline-moe-theme))
+  #+END_SRC 
+**** centaur tabs
+   #+BEGIN_SRC emacs-lisp
+   (use-package centaur-tabs
+   :ensure t
+   :init
+   (setq centaur-tabs-style "slant"
+   centaur-tabs-set-icons t
+   centaur-tabs-cycle-scope 'tabs
+   centaur-tabs-set-modified-marker t
+   centaur-tabs-modified-marker "*")
+   :config
+   (centaur-tabs-mode t)
+   (centaur-tabs-headline-match)
+   :bind (("C-<prior>" . 'centaur-tabs-backward)
+   ("C-<next>"  . 'centaur-tabs-forward)))
+   #+END_SRC
+**** helm
+  #+BEGIN_SRC emacs-lisp
+  (use-package helm
+      :ensure t
+      :config
+      (helm-mode 1)
+      :bind (("M-x" . 'helm-M-x)
+	     ("C-x C-f" . 'helm-find-files)))
+  #+END_SRC
+
+*** Programming helpers
+**** Rainbow delimiters
+helps identifying matching parentesis easily. In LISP it is really important
+  #+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+  #+END_SRC
+**** Autopair
+creates a closing delimiter whenever we open one
+  #+BEGIN_SRC emacs-lisp
+  (use-package autopair
+  :init
+  (setq autopair-autowrap t
+  autopair-blink nil)
+  :config
+  (autopair-global-mode t))
+  #+END_SRC
+**** Auto-complete
+automatically completes words in programming modes
+   #+BEGIN_SRC emacs-lisp
+   (use-package auto-complete
+   :ensure t
+   :config
+   (global-auto-complete-mode t)
+   :hook (prog-mode #'auto-complete-mode))
+  #+END_SRC
+**** slime
+   #+BEGIN_SRC emacs-lisp
+   (load (expand-file-name "~/quicklisp/slime-helper.el"))
+   ;; Replace "sbcl" with the path to your implementation
+   (setq inferior-lisp-program "/usr/bin/sbcl")
+
+    ;; (eval-and-compile (require 'slime-autoloads))
+    ;; (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu))
+   #+END_SRC
+
+   
+*** org mode configuration
+   #+BEGIN_SRC emacs-lisp
+   (use-package org
+     :init
+     (setq org-startup-folded 'content
+	   org-log-done t
+	   org-directory "~/git/orgfiles")
+     :bind(("\C-cl" . 'org-store-link)
+	   ("\C-ca" . 'org-agenda)))
+   #+END_SRC
+**** org-superstar
+mainly eye candy but at least I don't need to see so many * and so org mode is more condensed
+   #+BEGIN_SRC emacs-lisp
+   (use-package org-superstar
+      :ensure t
+      :hook (org-mode . (lambda () (org-superstar-mode 1))))
+   #+END_SRC
+*** random packages    
+**** add search engines to search
+search several places from emacs
+   #+BEGIN_SRC emacs-lisp
+   (use-package engine-mode
+      :ensure t
+      :config
+      (engine-mode t))
+    ;; to change the default browser from firefox to eww uncomment the following line
+    ;;(setq engine/browser-function 'eww-browse-url)
+    ;; the search engines are defined in file:
+    (load (expand-file-name "~/.emacs.d/search_engines.el"))
+   #+END_SRC
+**** writeroom mode
+a mode to hide all distraction from emacs and keep focused in the current document and work
+   #+BEGIN_SRC emacs-lisp
+   (use-package writeroom-mode
+      :ensure t
+      :bind(([f5] . 'writeroom-mode))
+      :hook (writeroom-mode . (lambda () (if (symbol-value 'display-line-numbers-mode)
+					     (display-line-numbers-mode 0)
+					   (display-line-numbers-mode 1)))))
+   #+END_SRC
+
