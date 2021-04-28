@@ -7,5 +7,6 @@
 !torresconfig.org
 !init.el
 !search_engines.el
-!*/
+!config-session.el
+
 

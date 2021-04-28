@@ -15,7 +15,7 @@
  '(org-agenda-files (quote ("~/git/orgfiles/todo.org")))
  '(package-selected-packages
    (quote
-    (helm-spotify-plus helm use-package autopair writeroom-mode engine-mode all-the-icons org-superstar centaur-tabs rainbow-delimiters powerline auto-complete))))
+    (persistent-scratch which-key diminish magit helm-spotify-plus helm use-package autopair writeroom-mode engine-mode all-the-icons org-superstar centaur-tabs rainbow-delimiters powerline auto-complete))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

@@ -91,6 +91,11 @@ can be used with windmove-default-keybindings using S-arrows, but I do not like 
     #+BEGIN_SRC emacs-lisp
     (setq-default frame-title-format '("%b [%m]"))
     #+END_SRC
+*** winner mode
+    this mode allows to navigate in the history of window configuration
+    #+BEGIN_SRC emacs-lisp
+    (winner-mode t)
+    #+END_SRC
 
 
 ** Packages
@@ -108,56 +113,93 @@ can be used with windmove-default-keybindings using S-arrows, but I do not like 
  #     (package-install 'use-package))
  #   (require 'use-package)
  # #+END_SRC
-*** Customize look and feel
-**** All the icons
-package to display icons
+*** config session
   #+BEGIN_SRC emacs-lisp
-  (use-package all-the-icons
-  :ensure t)
+  (defconst +session-dir+       (expand-file-name "~/.emacs.d/session/"))
+  (load "~/.emacs.d/config-session.el")
+  (require 'config-session) ; session
   #+END_SRC
+
+*** Customize look and feel
+**** diminish
+package to hide minor modes from modeline
+    #+BEGIN_SRC emacs-lisp
+    (use-package diminish
+    :ensure t)
+    (diminish 'visual-line-mode)
+    #+END_SRC
 **** powerline
   #+BEGIN_SRC emacs-lisp
   (use-package powerline
-  :ensure t)
+  :ensure t
+  :init
+  (powerline-default-theme))
   #+END_SRC
 **** moe theme
 my current theme, it has some minor changes compared to the origial, mainly the background is darker, and that is the reason why it does not have the ensure
    #+BEGIN_SRC emacs-lisp
-   (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
-   (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
-   (use-package moe-theme
-   :init
-   (load-theme 'moe-dark t)
-   :config
-   (powerline-moe-theme))
+     (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
+     (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
+     (require 'moe-theme)
+     (moe-dark)
   #+END_SRC 
 **** centaur tabs
    #+BEGIN_SRC emacs-lisp
    (use-package centaur-tabs
    :ensure t
-   :init
-   (setq centaur-tabs-style "slant"
-   centaur-tabs-set-icons t
-   centaur-tabs-cycle-scope 'tabs
-   centaur-tabs-set-modified-marker t
-   centaur-tabs-modified-marker "*")
-   :config
-   (centaur-tabs-mode t)
-   (centaur-tabs-headline-match)
    :bind (("C-<prior>" . 'centaur-tabs-backward)
    ("C-<next>"  . 'centaur-tabs-forward)))
+   (centaur-tabs-mode t)
+   (centaur-tabs-headline-match)
+   (setq centaur-tabs-style "slant")
+   (setq centaur-tabs-set-icons t)
+   (setq centaur-tabs-cycle-scope 'tabs)
+   (setq centaur-tabs-set-modified-marker t)
+   (setq centaur-tabs-modified-marker "*")
+
    #+END_SRC
 **** helm
   #+BEGIN_SRC emacs-lisp
   (use-package helm
       :ensure t
+      :diminish helm-mode
       :config
       (helm-mode 1)
       :bind (("M-x" . 'helm-M-x)
-	     ("C-x C-f" . 'helm-find-files)))
+	     ("C-x C-f" . 'helm-find-files)
+	     ("C-x C-b" . 'helm-buffers-list)
+	     ("C-x b" . 'helm-mini)))
   #+END_SRC
-
+**** which-key
+    #+BEGIN_SRC emacs-lisp
+    (use-package which-key
+    :ensure t
+    :init (which-key-mode)
+    :diminish which-key-mode
+    :config
+    (setq which-key-ide-delay 0.5))
+    #+END_SRC
+**** All the icons
+package to display icons
+  #+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+  :ensure t
+  :init
+  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+  #+END_SRC
+**** persistent scratch
+    #+BEGIN_SRC emacs-lisp
+    (use-package persistent-scratch
+    :ensure t
+    :init 
+    (persistent-scratch-setup-default)
+    (persistent-scratch-autosave-mode 1))
+    #+END_SRC
 *** Programming helpers
+
+**** Magit
+(use-package magit
+  :ensure t)
 **** Rainbow delimiters
 helps identifying matching parentesis easily. In LISP it is really important
   #+BEGIN_SRC emacs-lisp
@@ -171,10 +213,9 @@ creates a closing delimiter whenever we open one
   #+BEGIN_SRC emacs-lisp
   (use-package autopair
   :init
-  (setq autopair-autowrap t
-  autopair-blink nil)
-  :config
-  (autopair-global-mode t))
+ (setq autopair-autowrap t)
+  (setq autopair-blink nil)
+  (autopair-global-mode))
   #+END_SRC
 **** Auto-complete
 automatically completes words in programming modes
@@ -235,5 +276,24 @@ a mode to hide all distraction from emacs and keep focused in the current docume
       :hook (writeroom-mode . (lambda () (if (symbol-value 'display-line-numbers-mode)
 					     (display-line-numbers-mode 0)
 					   (display-line-numbers-mode 1)))))
+   #+END_SRC
+** Functions
+*** mygrep
+    #+BEGIN_SRC emacs-lisp
+    (defun mygrep ()
+      "Recursively grep from current file directory, ignoring comments."
+      (interactive)
+      (let* ((search-term (read-string "search term: "))
+             (search-path
+	       (directory-file-name (expand-file-name (read-directory-name "directory: "))))
+             (default-directory (file-name-as-directory search-path))
+             (grep-command
+	       (concat
+	         grep-program
+	         " -inIr --include=*.{lisp,cl,bil,el,js,ts,css,xsl,html,dic} -e \"^[^;]*"
+	         search-term
+		 "\" "
+		 search-path)))
+            (compilation-start grep-command 'grep-mode (lambda (mode) "grep") nil)))
    #+END_SRC
 
