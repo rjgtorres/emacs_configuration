@@ -18,9 +18,11 @@
     #+BEGIN_SRC emacs-lisp
   (global-hl-line-mode 1)
     #+END_SRC
-*** open without toolbar
+*** configure viewing area
     #+BEGIN_SRC emacs-lisp
   (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (toggle-scroll-bar -1)
     #+END_SRC
 *** line numbers everywhere
     #+BEGIN_SRC emacs-lisp
@@ -194,10 +196,12 @@ my current theme, it has some minor changes compared to the origial, mainly the 
 **** All the icons
 package to display icons
   #+BEGIN_SRC emacs-lisp
-  (use-package all-the-icons
-  :ensure t
-  :init
-  (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+    (use-package all-the-icons
+      :ensure t)
+    (use-package all-the-icons-dired
+      :ensure t
+      :init
+      (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
   #+END_SRC
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
@@ -220,14 +224,10 @@ helps identifying matching parentesis easily. In LISP it is really important
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
   #+END_SRC
-**** Autopair
-creates a closing delimiter whenever we open one
+**** electric-pair-mode
+does the same as Autopais, but is already included in emacs
   #+BEGIN_SRC emacs-lisp
-  (use-package autopair
-  :init
- (setq autopair-autowrap t)
-  (setq autopair-blink nil)
-  (autopair-global-mode))
+    (electric-pair-mode t)
   #+END_SRC
 **** Auto-complete
 automatically completes words in programming modes
@@ -270,7 +270,6 @@ automatically completes words in programming modes
 
    #+END_SRC
 
-
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
    (use-package org
@@ -306,10 +305,7 @@ a mode to hide all distraction from emacs and keep focused in the current docume
    #+BEGIN_SRC emacs-lisp
      (use-package writeroom-mode
        :ensure t
-       :bind(([f5] . 'writeroom-mode))
-       :hook (writeroom-mode . (lambda () (if (symbol-value 'display-line-numbers-mode)
-					      (display-line-numbers-mode 0)
-					    (display-line-numbers-mode 1)))))
+       :bind(([f5] . 'writeroom-mode)))
    #+END_SRC
 ** Functions
 *** mygrep
