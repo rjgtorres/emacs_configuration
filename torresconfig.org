@@ -14,6 +14,30 @@
     # #+END_SRC
 
 ** general basic emacs configuration
+*** Keybindings
+**** define shortcuts to change visible buffers
+ can be used with windmove-default-keybindings using S-arrows, but I do not like it
+     #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "C-x C-<up>") 'windmove-up)
+     (global-set-key (kbd "C-x C-<down>") 'windmove-down)
+     (global-set-key (kbd "C-x C-<left>") 'windmove-left)
+     (global-set-key (kbd "C-x C-<right>") 'windmove-right)
+     #+END_SRC
+**** auto-indent
+     #+BEGIN_SRC emacs-lisp
+     (define-key global-map (kbd "RET") 'newline-and-indent)
+     (setq-default tab-always-indent 'complete)
+     #+END_SRC
+**** kill buffer
+     #+BEGIN_SRC emacs-lisp
+       (global-set-key (kbd "C-q") 'kill-this-buffer)
+     #+END_SRC
+**** move window 2 lines
+     #+BEGIN_SRC emacs-lisp
+     (global-set-key (kbd "M-<down>") (kbd "C-u 2 C-v"))
+     (global-set-key (kbd "M-<up>") (kbd "C-u 2 M-v"))
+     #+END_SRC
+
 *** highlight current line
     #+BEGIN_SRC emacs-lisp
   (global-hl-line-mode 1)
@@ -24,7 +48,7 @@
   (menu-bar-mode -1)
   (toggle-scroll-bar -1)
     #+END_SRC
-*** line numbers everywhere
+*** line numbers in programming modes
     #+BEGIN_SRC emacs-lisp
     (add-hook 'prog-mode-hook 'display-line-numbers-mode)
     #+END_SRC
@@ -44,14 +68,10 @@
     #   (setq ido-enable-flex-matching t)
     #   (setq ido-everywhere t)
     # #+END_SRC
-*** auto-indent
-    #+BEGIN_SRC emacs-lisp
-    (define-key global-map (kbd "RET") 'newline-and-indent)
-    (setq-default tab-always-indent 'complete)
-    #+END_SRC
 *** y or n are sufficient
     #+BEGIN_SRC emacs-lisp
-    (fset 'yes-or-no-p 'y-or-n-p)
+      (setf use-short-answers t)
+      ;; (fset 'yes-or-no-p 'y-or-n-p)
     #+END_SRC
 *** selection and deletion configuration
     when you mark a region, you can delete it or replace it as in other Windows programs:
@@ -81,14 +101,6 @@
     (setf display-time-24hr-format t)
     (display-time-mode 1)
     #+END_SRC
-*** define shortcuts to change visible buffers
-can be used with windmove-default-keybindings using S-arrows, but I do not like it
-    #+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-x C-<up>") 'windmove-up)
-    (global-set-key (kbd "C-x C-<down>") 'windmove-down)
-    (global-set-key (kbd "C-x C-<left>") 'windmove-left)
-    (global-set-key (kbd "C-x C-<right>") 'windmove-right)
-    #+END_SRC
 *** set window name as current buffer
     #+BEGIN_SRC emacs-lisp
     (setq-default frame-title-format '("%b [%m]"))
@@ -104,6 +116,36 @@ can be used with windmove-default-keybindings using S-arrows, but I do not like 
     (winner-mode t)
     #+END_SRC
 
+*** Delete trailing whitespace on saving
+     #+BEGIN_SRC emacs-lisp
+       (add-hook 'before-save-hook 'delete-trailing-whitespace)
+     #+END_SRC
+
+*** prettify symbols
+     #+BEGIN_SRC emacs-lisp
+       (defun my-add-pretty-list ()
+	 "make some word or string show as pretty unicode symbols"
+	 (mapc (lambda (pair) (push pair prettify-symbols-alist))
+	       '(
+		 ("lambda" . 955)
+		 ("->" . 8594)
+		 ("=>" . 8658)
+		 ("<=" . 8804)
+		 (">=" . 8805)
+		 ("sqrt" . 8730)
+		 ("alpha" . 945)
+		 ("beta" . 946)
+		 ("delta" . 916)
+		 ("omega" . 937)
+		 ("phi" . 969)
+		 ("pi" . 960)
+		 ("psi" . 936)
+		 ("theta" . 952)
+		 ("sum" . 8721))))
+       (add-hook 'prog-mode-hook 'my-add-pretty-list)
+       (add-hook 'org-mode-hook 'my-add-pretty-list)
+       (global-prettify-symbols-mode +1)
+     #+END_SRC
 
 ** Packages
  #   #*** Melpa and use-Package
@@ -154,7 +196,8 @@ my current theme, it has some minor changes compared to the origial, mainly the 
      (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
      (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
      (require 'moe-theme)
-     (moe-dark)
+     (require 'moe-theme-flavours)
+     (moe-theme-flavour-darkmate)
      (moe-theme-apply-color 'g/b)
   #+END_SRC
 **** centaur tabs
@@ -243,7 +286,11 @@ automatically completes words in programming modes
   (use-package company
     :ensure t
     :init
-    (add-hook 'after-init-hook 'global-company-mode))
+    (add-hook 'after-init-hook 'global-company-mode)
+    :config
+    (setq company-idle-delay 0
+	  company-minimum-prefix-length 2
+	  company-selection-wrap-around t))
 #+end_src
 **** hl-todo
 #+begin_src emacs-lisp
@@ -269,6 +316,15 @@ automatically completes words in programming modes
 		     slime-company-after-completion 'slime-company-just-one-space))
 
    #+END_SRC
+**** multiple-cursors
+     #+BEGIN_SRC emacs-lisp
+       (use-package multiple-cursors
+	 :ensure t
+	 :bind (("C-S-c C-S-c" . 'mc/edit-lines)
+		("C->" . 'mc/mark-next-like-this)
+		("C-<" . 'mc/mark-previous-like-this)
+		("C-c C-<" . 'mc/mark-all-like-this)))
+     #+END_SRC
 
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
@@ -307,6 +363,12 @@ a mode to hide all distraction from emacs and keep focused in the current docume
        :ensure t
        :bind(([f5] . 'writeroom-mode)))
    #+END_SRC
+**** command log
+     #+BEGIN_SRC emacs-lisp
+       (use-package command-log-mode
+	 :ensure t)
+     #+END_SRC
+
 ** Functions
 *** mygrep
     #+BEGIN_SRC emacs-lisp
