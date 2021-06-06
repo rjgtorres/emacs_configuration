@@ -11,7 +11,7 @@
  '(org-agenda-files (quote ("~/git/orgfiles/todo.org")))
  '(package-selected-packages
    (quote
-    (projectile lsp-ui helm-lsp lsp-pyright lsp-mode command-log-mode multiple-cursors magit writeroom-mode engine-mode org-superstar hl-todo company rainbow-delimiters persistent-scratch all-the-icons-dired which-key helm doom-modeline diminish use-package))))
+    (projectile command-log-mode multiple-cursors writeroom-mode engine-mode org-superstar hl-todo company rainbow-delimiters persistent-scratch all-the-icons-dired which-key helm doom-modeline use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -35,4 +35,4 @@
   (setq-default
    use-package-always-defer t)
 (require 'org)
-(org-babel-load-file "~/.emacs.d/torresconfig.org")
+(org-babel-load-file "~/.emacs.d/configs/generic_config.org")

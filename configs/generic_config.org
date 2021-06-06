@@ -6,8 +6,8 @@
        (defvar siscog-p (string-match "rtorres" (user-login-name)))
        (defvar win-p (eq window-system 'w32))
        (if siscog-p
-	   (org-babel-load-file "./work_config.org")
-	 (org-babel-load-file "./home_config.org"))
+	   (org-babel-load-file "~/.emacs.d/configs/work_config.org")
+	 (org-babel-load-file "~/.emacs.d/configs/home_config.org"))
      #+END_SRC
 * Settings
 ** Windows configuration
@@ -201,14 +201,35 @@ my current theme, it has some minor changes compared to the origial, mainly the 
 **** helm
   #+BEGIN_SRC emacs-lisp
     (use-package helm
-	:ensure t
-	;; :diminish helm-mode
-	:config
-	(helm-mode 1)
-	:bind (("M-x" . 'helm-M-x)
-	       ("C-x C-f" . 'helm-find-files)
-	       ("C-x C-b" . 'helm-buffers-list)
-	       ("C-x b" . 'helm-mini)))
+      :ensure t
+      :diminish helm-mode
+      :config
+      (helm-mode 1)
+      (helm-autoresize-mode 1)
+      (setq helm-autoresize-max-height 40
+	    helm-autoresize-min-height 20
+	    helm-split-window-in-side-p t
+	    helm-mode-fuzzy-match t
+	    helm-completion-in-region-fuzzy-match t)
+      :bind (("M-x" . 'helm-M-x)
+	     ("C-x C-f" . 'helm-find-files)
+	     ("C-x C-b" . 'helm-buffers-list)
+	     ("C-x b" . helm-mini)
+	     ("C-x C-g" . helm-grep-do-git-grep)))
+    ;; (require 'helm-icons)
+    ;; (customize-set-value 'helm-icons-mode->icon nil)
+    ;; ;; (customize-set-value helm-icons-provider 'all-the-icons)
+    ;; (helm-icons-enable)
+    (if siscog-p
+	(progn
+	  (load "~/.emacs.d/elpa/helm-slime/helm-slime.el")
+	  (use-package helm-slime
+	    :ensure nil
+	    :init (global-helm-slime-mode)))
+      (use-package helm-slime
+	    :ensure t
+	    :init (global-helm-slime-mode)))
+
   #+END_SRC
 **** which-key
     #+BEGIN_SRC emacs-lisp
@@ -357,12 +378,8 @@ does the same as Autopais, but is already included in emacs
     (setq company-idle-delay 0
 	  company-minimum-prefix-length 2
 	  company-selection-wrap-around t)
-    :after lsp-mode
-    :hook (lsp-mode . company-mode)
     :bind (:map company-active-map
-	   ("<tab>" . company-complete-selection))
-	  (:map lsp-mode-map
-	   ("<tab>" . company-indent-or-complete-common)))
+	   ("<tab>" . company-complete-selection)))
 #+end_src
 **** hl-todo
 #+begin_src emacs-lisp
@@ -392,20 +409,32 @@ does the same as Autopais, but is already included in emacs
     :bind-keymap
     ("C-c p" . projectile-command-map)
     :init
-    ;; NOTE: Set this to the folder where you keep your Git repos!
-    (when (file-directory-p "~/git")
-      (setq projectile-project-search-path '("~/git")))
+    ;; NOTE: Set this to the folder where you keep your Git repos!x
     (setq projectile-switch-project-action #'projectile-dired))
        #+END_SRC
+**** slime
+This configuration comes from my home config and is commented at SISCOG because slime configuration comes from sc-emacs
+      #+BEGIN_SRC emacs-lisp
+	;; (defvar *use-slime* t)
+	;; (add-hook 'slime-mode-hook 'set-up-slime-ac)
+	;; (add-hook 'slime-repl-mode-hook 'set-up-slime-ac)
+	;; (eval-after-load "auto-complete"
+	;;   '(add-to-list 'ac-modes 'slime-repl-mode))
+
+	(use-package slime-company
+	  :after (slime company)
+	  :config (setq slime-company-completion 'fuzzy
+			slime-company-after-completion 'slime-company-just-one-space))
+      #+END_SRC
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
-   (use-package org
-     :init
-     (setq org-startup-folded 'content
-	   org-log-done t
-	   org-directory "~/git/orgfiles")
-     :bind(("\C-cl" . 'org-store-link)
-	   ("\C-ca" . 'org-agenda)))
+     (use-package org
+       :init
+       (setq org-startup-folded 'content
+	     org-log-done t)
+       :bind (("\C-cl" . 'org-store-link)
+	      ("\C-ca" . 'org-agenda))
+       :config (setq org-support-shift-select t))
    #+END_SRC
 **** org-superstar
 mainly eye candy but at least I don't need to see so many * and so org mode is more condensed

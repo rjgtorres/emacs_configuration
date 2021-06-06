@@ -8,12 +8,31 @@
 
 * packages
 
+** generic packages
+*** projectile
+#+begin_src emacs-lisp
+(use-package projectile
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    (setq projectile-project-search-path '("z:/siscog"))
+    (when (file-directory-p "~/git")
+      (setq projectile-project-search-path '("~/git"))))
+#+end_src
 ** programming helpers
 *** Magit
   #+BEGIN_SRC emacs-lisp
     (use-package magit
       :ensure t)
   #+END_SRC
+*** company-mode
+#+begin_src emacs-lisp
+  (use-package company
+    :after lsp-mode
+    :hook (lsp-mode . company-mode)
+    :bind (:map lsp-mode-map
+	   ("<tab>" . company-indent-or-complete-common)))
+#+end_src
+
 *** Languages
 **** Generic
 ***** lsp-mode
@@ -57,9 +76,9 @@
 
        ;; (eval-and-compile (require 'slime-autoloads))
        ;; (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu))
-      (use-package slime-company
-	:after (slime company)
-	:config (setq slime-company-completion 'fuzzy
-		      slime-company-after-completion 'slime-company-just-one-space))
-
     #+END_SRC
+* org mode
+   #+BEGIN_SRC emacs-lisp
+     (setq org-directory "~/git/orgfiles"
+	   org-agenda-files '("~/git/orgfiles/todo.org"))
+   #+END_SRC

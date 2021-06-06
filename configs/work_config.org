@@ -1,1 +1,93 @@
+* SISCOG main funcionalities
+siscog packages will be loaded at this point,configuring sc-emacs and the parts of emn-custom that I use.
+#+begin_src emacs-lisp
+(set-language-environment "Latin-1")
 
+(setq sc-legacy-mode nil)
+(setq *use-slime* t)
+(load (expand-file-name "init.el" (getenv "SISCOG_EMACS_DIR")))
+
+(let ((emn-custom-dir (getenv "SISCOG_EMACS_DIR_LOCAL")))
+  (load (format "%s/siscog/emn-custom/sc-global-param-custom.el" emn-custom-dir))
+  (load (format "%s/siscog/emn-custom/set-company.el" emn-custom-dir))
+  (load (format "%s/siscog/emn-custom/pms-templates.el" emn-custom-dir)))
+#+end_src
+** SISCOG local variables
+#+begin_src emacs-lisp
+;;;-----------------------------------------------------------------------------
+;;; Local CREWS top directory (ver sc-models.el)
+;;;-----------------------------------------------------------------------------
+(setq *sc-local-repository-dir*  "z:/siscog")
+
+;;;-----------------------------------------------------------------------------
+;;; Local CREWS top directory for binaries and patches
+;;; (see 'sc-models.el' and 'sc-run-crews-images.el' (definition 'sc-select-appl-version-dir'))
+;;;-----------------------------------------------------------------------------
+(setq *sc-binary-repository-dir* "z:/siscog")
+
+;;;-----------------------------------------------------------------------------
+;;; SISCOG area CREWS top directory (ver sc-models.el)
+;;;-----------------------------------------------------------------------------
+(setq *sc-central-repository-dir* "z:/siscog")
+
+  (setq *default-mod-date*   "01/12/31")
+(setq *default-author*     "Ricardo Torres")
+(setq *default-org-dir*    *sc-central-repository-dir*)
+(setq *default-src-dir*    (getenv "SISCOG_DIR"))
+(setq *default-mod-dir*    "z:/siscog/alteracoes")
+(setq *modif-request-file* (format "%s/.modif-requests" *default-mod-dir*))
+(setq *actions-log-file*   (format "%s/.big-brother-file" *default-mod-dir*)) ;; NIL para nao informar o BIG-BROTHER...
+(setq *modifs-mail-dir*    "y:/mail")
+(setq *modif-mail-from*    "rtorres@siscog.pt")
+(setq *modif-mail-name*    "modif-request-mail")
+(setf *digest-mail-name*   "y:/mail/modifs")
+
+(setq *emacs-init-file*    (format "%s/init.el" (getenv "SISCOG_EMACS_DIR")))
+(setq *emacs-program*      "emacs")
+
+;;;-----------------------------------------------------------------------------
+;;; Modifications mail (ver sc-mail.el)
+;;;-----------------------------------------------------------------------------
+(setq user-full-name "Ricardo Torres")
+(setq user-mail-address "rtorres@siscog.pt")
+
+;;;-----------------------------------------------------------------------------
+;;; Lisp Documentation (ver cl-hyperspec/online-doc.el)
+;;;-----------------------------------------------------------------------------
+(set-lisp-doc-home "file://public/lisp")
+
+;;;-----------------------------------------------------------------------------
+;;; Grepfc (ver sc-grepfc.el)
+;;;-----------------------------------------------------------------------------
+(setq *grepfc-top-dir* "z:/siscog")
+(setq *grepfc-names* '("crews" "cp" "ns" "dsb" "nsb" "wagn" "vr" "ml" "stog"))
+(global-set-key [f2] 'grepfc-goto-line)
+(global-set-key [C-f2] 'grepfc-goto-patch-log)
+(global-set-key [M-f2] 'grepfc-goto-patch-data)
+#+end_src
+* Packages and their configuration
+** magit shortcuts
+ Magit configuration comes from sc-emacs, but I want to have magit to have the default shortcut
+ #+begin_src emacs-lisp
+   (global-set-key (kbd "C-x g") 'magit-status)
+ #+end_src
+** projectile
+#+begin_src emacs-lisp
+(use-package projectile
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    (setq projectile-project-search-path '("z:/siscog")))
+#+end_src
+* org mode
+   #+BEGIN_SRC emacs-lisp
+     (setq org-agenda-files '("z:/orgfiles/todo.org"))
+   #+END_SRC
+* Functions
+** latest-sbcl
+   #+BEGIN_SRC emacs-lisp
+    (defun latest-sbcl ()
+      "set latest available sbcl, unsetting Auto-detect ACL. Depends on sc-emacs"
+      (interactive)
+      (setq *sc-auto-switch-acl-version* nil)
+      (sc-set-sbcl-version (first (last (sc-find-sbcl-versions)))))
+   #+END_SRC
