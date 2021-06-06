@@ -1,18 +1,21 @@
 * Torres emacs configuration
 
+* Call next configuration
+     #+BEGIN_SRC emacs-lisp
+       (defvar x11-p (eq window-system 'x))
+       (defvar siscog-p (string-match "rtorres" (user-login-name)))
+       (defvar win-p (eq window-system 'w32))
+       (if siscog-p
+	   (org-babel-load-file "./work_config.org")
+	 (org-babel-load-file "./home_config.org"))
+     #+END_SRC
 * Settings
-
-  #+BEGIN_SRC emacs-lisp
-  (setq user-full-name "Ricardo Torres"
-        user-mail-address "ricardojgtorres@gmail.com")
-  #+END_SRC
-
 ** Windows configuration
 *** set a decent font in windows
-    # #+BEGIN_SRC emacs-lisp
-    #   (set-face-attribute 'default nil :family "Consolas" :height 110)
-    # #+END_SRC
-
+   #+BEGIN_SRC emacs-lisp
+     (when win-p
+       (set-face-attribute 'default nil :family "Consolas" :height 110))
+   #+END_SRC
 ** general basic emacs configuration
 *** Keybindings
 **** define shortcuts to change visible buffers
@@ -70,8 +73,9 @@
     # #+END_SRC
 *** y or n are sufficient
     #+BEGIN_SRC emacs-lisp
-      ;; for emacs 28+ (setf use-short-answers t)
-      (fset 'yes-or-no-p 'y-or-n-p)
+      (if (version< emacs-version "28")
+	  (fset 'yes-or-no-p 'y-or-n-p)
+	(setf use-short-answers t))
     #+END_SRC
 *** selection and deletion configuration
     when you mark a region, you can delete it or replace it as in other Windows programs:
@@ -106,9 +110,9 @@
     (setq-default frame-title-format '("%b [%m]"))
     #+END_SRC
 *** hide fringe
-#+begin_src emacs-lisp
-(fringe-mode 0)
-#+end_src
+ #+begin_src emacs-lisp
+ (fringe-mode 0)
+ #+end_src
 
 *** winner mode
     this mode allows to navigate in the history of window configuration
@@ -172,18 +176,12 @@
 *** Customize look and feel
 **** diminish
 package to hide minor modes from modeline
+I believe that by using the doom modeline this package becomes not necessary
     #+BEGIN_SRC emacs-lisp
-    (use-package diminish
-    :ensure t)
-    (diminish 'visual-line-mode)
+      ;; (use-package diminish
+      ;; :ensure t)
+      ;; (diminish 'visual-line-mode)
     #+END_SRC
-**** powerline
-  #+BEGIN_SRC emacs-lisp
-    ;; (use-package powerline
-    ;; :ensure t
-    ;; :init
-    ;; (powerline-default-theme))
-  #+END_SRC
 **** Doom modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
@@ -200,26 +198,11 @@ my current theme, it has some minor changes compared to the origial, mainly the 
      (moe-theme-flavour-darkmate)
      (moe-theme-apply-color 'g/b)
   #+END_SRC
-**** centaur tabs
-   #+BEGIN_SRC emacs-lisp
-     ;; (use-package centaur-tabs
-     ;; :ensure t
-     ;; :bind (("C-<prior>" . 'centaur-tabs-backward)
-     ;; ("C-<next>"  . 'centaur-tabs-forward)))
-     ;; (centaur-tabs-mode t)
-     ;; (centaur-tabs-headline-match)
-     ;; (setq centaur-tabs-style "slant")
-     ;; (setq centaur-tabs-set-icons t)
-     ;; (setq centaur-tabs-cycle-scope 'tabs)
-     ;; (setq centaur-tabs-set-modified-marker t)
-     ;; (setq centaur-tabs-modified-marker "*")
-
-   #+END_SRC
 **** helm
   #+BEGIN_SRC emacs-lisp
     (use-package helm
 	:ensure t
-	:diminish helm-mode
+	;; :diminish helm-mode
 	:config
 	(helm-mode 1)
 	:bind (("M-x" . 'helm-M-x)
@@ -229,12 +212,12 @@ my current theme, it has some minor changes compared to the origial, mainly the 
   #+END_SRC
 **** which-key
     #+BEGIN_SRC emacs-lisp
-    (use-package which-key
-    :ensure t
-    :init (which-key-mode)
-    :diminish which-key-mode
-    :config
-    (setq which-key-ide-delay 0.5))
+      (use-package which-key
+      :ensure t
+      :init (which-key-mode)
+      ;; :diminish which-key-mode
+      :config
+      (setq which-key-ide-delay 0.5))
     #+END_SRC
 **** All the icons
 package to display icons
@@ -248,28 +231,109 @@ package to display icons
   #+END_SRC
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
-    (use-package persistent-scratch
-    :ensure t
-    :init
-    (persistent-scratch-setup-default)
-    (persistent-scratch-autosave-mode 1))
+      (use-package persistent-scratch
+	:ensure t
+	:init
+	(persistent-scratch-setup-default)
+	(persistent-scratch-autosave-mode 1))
     #+END_SRC
-**** term config
-#+BEGIN_SRC emacs-lisp
-  (use-package term
-    :config
-    (setq explicit-shell-file-name "zsh") ;; Change this to zsh, etc
-    ;;(setq explicit-zsh-args '())         ;; Use 'explicit-<shell>-args for shell-specific args
+**** treemacs
+to be installed and configured, the following is the configuration that is advised in treemacs git repository
+     #+BEGIN_SRC emacs-lisp
+       ;; (use-package treemacs
+       ;;   :ensure t
+       ;;   :defer t
+       ;;   :init
+       ;;   (with-eval-after-load 'winum
+       ;;     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+       ;;   :config
+       ;;   (progn
+       ;;     (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+       ;; 	  treemacs-deferred-git-apply-delay      0.5
+       ;; 	  treemacs-directory-name-transformer    #'identity
+       ;; 	  treemacs-display-in-side-window        t
+       ;; 	  treemacs-eldoc-display                 t
+       ;; 	  treemacs-file-event-delay              5000
+       ;; 	  treemacs-file-extension-regex          treemacs-last-period-regex-value
+       ;; 	  treemacs-file-follow-delay             0.2
+       ;; 	  treemacs-file-name-transformer         #'identity
+       ;; 	  treemacs-follow-after-init             t
+       ;; 	  treemacs-expand-after-init             t
+       ;; 	  treemacs-git-command-pipe              ""
+       ;; 	  treemacs-goto-tag-strategy             'refetch-index
+       ;; 	  treemacs-indentation                   2
+       ;; 	  treemacs-indentation-string            " "
+       ;; 	  treemacs-is-never-other-window         nil
+       ;; 	  treemacs-max-git-entries               5000
+       ;; 	  treemacs-missing-project-action        'ask
+       ;; 	  treemacs-move-forward-on-expand        nil
+       ;; 	  treemacs-no-png-images                 nil
+       ;; 	  treemacs-no-delete-other-windows       t
+       ;; 	  treemacs-project-follow-cleanup        nil
+       ;; 	  treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+       ;; 	  treemacs-position                      'left
+       ;; 	  treemacs-read-string-input             'from-child-frame
+       ;; 	  treemacs-recenter-distance             0.1
+       ;; 	  treemacs-recenter-after-file-follow    nil
+       ;; 	  treemacs-recenter-after-tag-follow     nil
+       ;; 	  treemacs-recenter-after-project-jump   'always
+       ;; 	  treemacs-recenter-after-project-expand 'on-distance
+       ;; 	  treemacs-litter-directories            '("/node_modules" "/.venv" "/.cask")
+       ;; 	  treemacs-show-cursor                   nil
+       ;; 	  treemacs-show-hidden-files             t
+       ;; 	  treemacs-silent-filewatch              nil
+       ;; 	  treemacs-silent-refresh                nil
+       ;; 	  treemacs-sorting                       'alphabetic-asc
+       ;; 	  treemacs-space-between-root-nodes      t
+       ;; 	  treemacs-tag-follow-cleanup            t
+       ;; 	  treemacs-tag-follow-delay              1.5
+       ;; 	  treemacs-user-mode-line-format         nil
+       ;; 	  treemacs-user-header-line-format       nil
+       ;; 	  treemacs-width                         35
+       ;; 	  treemacs-workspace-switch-cleanup      nil)
 
-    ;; Match the default Bash shell prompt.  Update this if you have a custom prompt
-    )
-       #+END_SRC
+       ;;     ;; The default width and height of the icons is 22 pixels. If you are
+       ;;     ;; using a Hi-DPI display, uncomment this to double the icon size.
+       ;;     ;;(treemacs-resize-icons 44)
 
+       ;;     (treemacs-follow-mode t)
+       ;;     (treemacs-filewatch-mode t)
+       ;;     (treemacs-fringe-indicator-mode 'always)
+       ;;     (pcase (cons (not (null (executable-find "git")))
+       ;; 		 (not (null treemacs-python-executable)))
+       ;;       (`(t . t)
+       ;;        (treemacs-git-mode 'deferred))
+       ;;       (`(t . _)
+       ;;        (treemacs-git-mode 'simple))))
+       ;;   :bind
+       ;;   (:map global-map
+       ;; 	("M-0"       . treemacs-select-window)
+       ;; 	("C-x t 1"   . treemacs-delete-other-windows)
+       ;; 	("C-x t t"   . treemacs)
+       ;; 	("C-x t B"   . treemacs-bookmark)
+       ;; 	("C-x t C-t" . treemacs-find-file)
+       ;; 	("C-x t M-t" . treemacs-find-tag)))
+
+       ;; (use-package treemacs-projectile
+       ;;   :after (treemacs projectile)
+       ;;   :ensure t)
+
+       ;; (use-package treemacs-icons-dired
+       ;;   :after (treemacs dired)
+       ;;   :ensure t
+       ;;   :config (treemacs-icons-dired-mode))
+
+       ;; (use-package treemacs-magit
+       ;;   :after (treemacs magit)
+       ;;   :ensure t)
+
+       ;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+       ;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+       ;;   :ensure t
+       ;;   :config (treemacs-set-scope-type 'Perspectives))
+     #+END_SRC
 *** Programming helpers
 
-**** Magit
-(use-package magit
-  :ensure t)
 **** Rainbow delimiters
 helps identifying matching parentesis easily. In LISP it is really important
   #+BEGIN_SRC emacs-lisp
@@ -282,15 +346,6 @@ helps identifying matching parentesis easily. In LISP it is really important
 does the same as Autopais, but is already included in emacs
   #+BEGIN_SRC emacs-lisp
     (electric-pair-mode t)
-  #+END_SRC
-**** Auto-complete
-automatically completes words in programming modes
-   #+BEGIN_SRC emacs-lisp
-     ;; (use-package auto-complete
-     ;; :ensure t
-     ;; :config
-     ;; (global-auto-complete-mode t)
-     ;; :hook (prog-mode #'auto-complete-mode))
   #+END_SRC
 **** company-mode
 #+begin_src emacs-lisp
@@ -327,55 +382,6 @@ automatically completes words in programming modes
 		("C->" . 'mc/mark-next-like-this)
 		("C-<" . 'mc/mark-previous-like-this)
 		("C-c C-<" . 'mc/mark-all-like-this)))
-     #+END_SRC
-**** Languages
-***** Generic
-****** lsp-mode
-       #+BEGIN_SRC emacs-lisp
-	 (use-package lsp-mode
-	   :ensure t
-	   :commands (lsp lsp-deferred)
-	   :init
-	   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-	   :hook ((f90-mode . lsp-mode)
-		  (python-mode . lsp-mode)
-		  (lsp-mode . lsp-enable-which-key-integration)))
-	 (use-package helm-lsp
-	   :ensure t
-	   :config
-	   (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-	 (use-package lsp-ui
-	   :ensure t
-	   :hook (lsp-mode . lsp-ui-mode)
-	   :custom
-	   (lsp-ui-doc-position 'bottom))
-       #+END_SRC
-***** Python
-       #+BEGIN_SRC emacs-lisp
-	 (use-package lsp-pyright
-	   :ensure t
-	   :hook (python-mode . (lambda ()
-				  (require 'lsp-pyright)
-				  (lsp))))  ; or lsp-deferred
-       #+END_SRC
-***** Fortran
-       #+BEGIN_SRC emacs-lisp
-	 (add-hook 'f90-mode-hook 'lsp)
-       #+END_SRC
-***** Lisp
-****** slime
-     #+BEGIN_SRC emacs-lisp
-       (load (expand-file-name "~/quicklisp/slime-helper.el"))
-       ;; Replace "sbcl" with the path to your implementation
-       (setq inferior-lisp-program "/usr/bin/sbcl")
-
-	;; (eval-and-compile (require 'slime-autoloads))
-	;; (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu))
-       (use-package slime-company
-	 :after (slime company)
-	 :config (setq slime-company-completion 'fuzzy
-		       slime-company-after-completion 'slime-company-just-one-space))
-
      #+END_SRC
 **** projectile
 #+BEGIN_SRC emacs-lisp
@@ -429,6 +435,7 @@ a mode to hide all distraction from emacs and keep focused in the current docume
        :bind(([f5] . 'writeroom-mode)))
    #+END_SRC
 **** command log
+Package useful for making emacs demonstrations
      #+BEGIN_SRC emacs-lisp
        (use-package command-log-mode
 	 :ensure t)
@@ -453,3 +460,38 @@ a mode to hide all distraction from emacs and keep focused in the current docume
 		 search-path)))
             (compilation-start grep-command 'grep-mode (lambda (mode) "grep") nil)))
    #+END_SRC
+
+* Unused Configurations
+Some packages I have used in the past, but for some reason I stoped using them, but the configuration might still be useful for someone, so I keep it here until I feel like cleaning this part.
+** powerline
+ #+BEGIN_SRC emacs-lisp
+   ;; (use-package powerline
+   ;; :ensure t
+   ;; :init
+   ;; (powerline-default-theme))
+ #+END_SRC
+** Auto-complete
+automatically completes words in programming modes
+   #+BEGIN_SRC emacs-lisp
+     ;; (use-package auto-complete
+     ;; :ensure t
+     ;; :config
+     ;; (global-auto-complete-mode t)
+     ;; :hook (prog-mode #'auto-complete-mode))
+  #+END_SRC
+
+** centaur tabs
+ #+BEGIN_SRC emacs-lisp
+   ;; (use-package centaur-tabs
+   ;; :ensure t
+   ;; :bind (("C-<prior>" . 'centaur-tabs-backward)
+   ;; ("C-<next>"  . 'centaur-tabs-forward)))
+   ;; (centaur-tabs-mode t)
+   ;; (centaur-tabs-headline-match)
+   ;; (setq centaur-tabs-style "slant")
+   ;; (setq centaur-tabs-set-icons t)
+   ;; (setq centaur-tabs-cycle-scope 'tabs)
+   ;; (setq centaur-tabs-set-modified-marker t)
+   ;; (setq centaur-tabs-modified-marker "*")
+
+ #+END_SRC

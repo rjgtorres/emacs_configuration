@@ -1,21 +1,17 @@
 
 
-;;;-----------------------------------------------------------------------------
-;;; Modifications mail (ver sc-mail.el)
-;;;-----------------------------------------------------------------------------
-(setq user-full-name "Ricardo Torres")
-(setq user-mail-address "rtorres@siscog.pt")
-
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("0feb7052df6cfc1733c1087d3876c26c66410e5f1337b039be44cb406b6187c6" "8290878d9ebe107ff0263dabf4f3e2255ee206484cd35c3afb11be86b0be7bf2" default)))
  '(org-agenda-files (quote ("~/git/orgfiles/todo.org")))
  '(package-selected-packages
    (quote
-    (persistent-scratch which-key diminish magit helm-spotify-plus helm use-package autopair writeroom-mode engine-mode all-the-icons org-superstar centaur-tabs rainbow-delimiters powerline auto-complete))))
+    (projectile lsp-ui helm-lsp lsp-pyright lsp-mode command-log-mode multiple-cursors magit writeroom-mode engine-mode org-superstar hl-todo company rainbow-delimiters persistent-scratch all-the-icons-dired which-key helm doom-modeline diminish use-package))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

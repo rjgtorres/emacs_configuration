@@ -2,11 +2,12 @@
 *
 
 # now I whitelist what I want tracked
+!*/
 !.gitignore
+games/
 
 !torresconfig.org
 !init.el
 !search_engines.el
 !config-session.el
-
-
+!configs/*.org
