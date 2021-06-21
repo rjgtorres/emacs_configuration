@@ -54,6 +54,10 @@
 	  :hook (lsp-mode . lsp-ui-mode)
 	  :custom
 	  (lsp-ui-doc-position 'bottom))
+	(use-package lsp-treemacs
+	  ;; project wide overview
+	  :ensure t
+	  :commands lsp-treemacs-errors-list)
       #+END_SRC
 **** Python
       #+BEGIN_SRC emacs-lisp
@@ -75,10 +79,13 @@
       (setq inferior-lisp-program "/usr/bin/sbcl")
 
        ;; (eval-and-compile (require 'slime-autoloads))
-       ;; (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu))
+       (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
     #+END_SRC
 * org mode
    #+BEGIN_SRC emacs-lisp
      (setq org-directory "~/git/orgfiles"
 	   org-agenda-files '("~/git/orgfiles/todo.org"))
+     (org-babel-do-load-languages
+      'org-babel-load-languages '((fortran . t)))
+     (setq org-babel-python-command "/usr/bin/python3")
    #+END_SRC
