@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: real
+# key: r
+# --
+real(kind=${1:4}) :: $0

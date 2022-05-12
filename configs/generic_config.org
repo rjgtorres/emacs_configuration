@@ -3,18 +3,19 @@
 * Call next configuration
      #+BEGIN_SRC emacs-lisp
        (defvar x11-p (eq window-system 'x))
-       (defvar siscog-p (string-match "rtorres" (user-login-name)))
+       ;; (defvar siscog-p (string-match "rtorres" (user-login-name)))
        (defvar win-p (eq window-system 'w32))
-       (if siscog-p
-	   (org-babel-load-file "~/.emacs.d/configs/work_config.org")
-	 (org-babel-load-file "~/.emacs.d/configs/home_config.org"))
+       ;; (if siscog-p
+       ;;     (org-babel-load-file "~/.emacs.d/configs/work_config.org")
+       ;;   (org-babel-load-file "~/.emacs.d/configs/home_config.org"))
      #+END_SRC
 * Settings
 ** Windows configuration
 *** set a decent font in windows
    #+BEGIN_SRC emacs-lisp
-     (when win-p
-       (set-face-attribute 'default nil :family "Consolas" :height 110))
+     (if win-p
+	 (set-face-attribute 'default nil :family "Consolas" :height 110)
+       (set-face-attribute 'default nil :family "Liberation mono" :height 105))
    #+END_SRC
 ** general basic emacs configuration
 *** Keybindings
@@ -122,7 +123,9 @@
 
 *** Delete trailing whitespace on saving
      #+BEGIN_SRC emacs-lisp
-       (add-hook 'before-save-hook 'delete-trailing-whitespace)
+       (use-package ws-butler
+	 :ensure t
+	 :hook (prog-mode-hook 'ws-butler-mode))
      #+END_SRC
 
 *** prettify symbols
@@ -220,15 +223,9 @@ my current theme, it has some minor changes compared to the origial, mainly the 
     ;; (customize-set-value 'helm-icons-mode->icon nil)
     ;; ;; (customize-set-value helm-icons-provider 'all-the-icons)
     ;; (helm-icons-enable)
-    (if siscog-p
-	(progn
-	  (load "~/.emacs.d/elpa/helm-slime/helm-slime.el")
-	  (use-package helm-slime
-	    :ensure nil
-	    :init (global-helm-slime-mode)))
-      (use-package helm-slime
-	    :ensure t
-	    :init (global-helm-slime-mode)))
+    (use-package helm-slime
+      :ensure t
+      :init (global-helm-slime-mode))
 
   #+END_SRC
 **** which-key
@@ -242,6 +239,8 @@ my current theme, it has some minor changes compared to the origial, mainly the 
     #+END_SRC
 **** All the icons
 package to display icons
+In a new installation it is needed to install the icons to be displayed: M-x all-the-icons-install-fonts
+in windows it is needed to go to the folder where the fonts are downloaded, open and install those fonts
   #+BEGIN_SRC emacs-lisp
     (use-package all-the-icons
       :ensure t)
@@ -354,6 +353,146 @@ to be installed and configured, the following is the configuration that is advis
        ;;   :config (treemacs-set-scope-type 'Perspectives))
      #+END_SRC
 *** Programming helpers
+   *** Magit
+  #+BEGIN_SRC emacs-lisp
+    (use-package magit
+      :ensure t)
+  #+END_SRC
+*** company-mode
+#+begin_src emacs-lisp
+    (use-package company
+      :after lsp-mode
+      :hook (lsp-mode . company-mode)
+      :bind (:map lsp-mode-map
+	     ("<tab>" . company-indent-or-complete-common))
+      :config
+  (setq company-show-numbers            t
+	company-minimum-prefix-length   1
+	company-idle-delay              0.5
+	company-backends
+	'((company-files          ; files & directory
+	   company-keywords       ; keywords
+	   company-capf           ; what is this?
+	   company-yasnippet)
+	  (company-abbrev company-dabbrev))))
+
+(use-package company-box
+  :ensure t
+  :after company
+  :hook (company-mode . company-box-mode))
+#+end_src
+
+*** Languages
+**** Generic
+***** lsp-mode
+      #+BEGIN_SRC emacs-lisp
+	(use-package lsp-mode
+	  :ensure t
+	  :commands (lsp lsp-deferred)
+	  :init
+	  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+	  :hook ((f90-mode . lsp-mode)
+		 (python-mode . lsp-mode)
+	 (c-mode . lsp)
+		 (lsp-mode . lsp-enable-which-key-integration)))
+	(use-package helm-lsp
+	  :ensure t
+	  :config
+	  (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+	(use-package lsp-ui
+	  :ensure t
+	  :hook (lsp-mode . lsp-ui-mode)
+	  :custom
+	  (lsp-ui-doc-position 'bottom))
+	(use-package lsp-treemacs
+	  ;; project wide overview
+	  :ensure t
+	  :commands lsp-treemacs-errors-list)
+      #+END_SRC
+***** yasnippet
+      #+begin_src emacs-lisp
+	(use-package yasnippet
+	  :ensure t
+	  :init (yas-global-mode 1)
+	  ;; :hook (prog-mode-hook . yas-minor-mode)
+	  :commands yas-reload-all)
+;; This illustrates how to redefine yas-expand to S-TAB.
+(define-key yas-minor-mode-map [backtab]     'yas-expand)
+
+;; Strangely, just redefining one of the variations below won't work.
+;; All rebinds seem to be needed.
+(define-key yas-minor-mode-map [(tab)]        nil)
+(define-key yas-minor-mode-map (kbd "TAB")    nil)
+(define-key yas-minor-mode-map (kbd "<tab>")  nil)
+
+      #+end_src
+***** flycheck
+      #+begin_src emacs-lisp
+;; flycheck
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode)
+  :config
+  (setq flycheck-display-errors-function
+	#'flycheck-display-error-messages-unless-error-list)
+
+  (setq flycheck-indication-mode nil))
+
+(use-package flycheck-pos-tip
+  :ensure t
+  :after flycheck
+  :config
+  (flycheck-pos-tip-mode))
+      #+end_src
+**** Python
+      #+BEGIN_SRC emacs-lisp
+	(use-package lsp-pyright
+	  :ensure t
+	  :hook (python-mode . (lambda ()
+				 (require 'lsp-pyright)
+				 (lsp))))  ; or lsp-deferred
+      #+END_SRC
+**** Fortran
+      #+BEGIN_SRC emacs-lisp
+	(add-hook 'f90-mode-hook 'lsp)
+      #+END_SRC
+**** C
+     #+begin_src emacs-lisp
+       (use-package ccls
+	 :ensure t
+	 :hook ((c-mode c++-mode objc-mode cuda-mode) .
+		(lambda () (require 'ccls) (lsp)))
+	 :config
+	 (setq ccls-executable "/usr/bin/ccls")
+	 (setq ccls-initialization-options
+	       '(:index (:comments 2) :completion (:detailedLabel t))))
+
+ ;; Indentation
+       (setq c-default-style "linux"
+	     c-basic-offset 4
+	     c-label-offset 0
+	     tab-width 4
+	     indent-tabs-mode nil)
+
+       ;; (add-hook 'c-mode-hook 'lsp)
+     #+end_src
+**** Lisp
+***** slime
+      # TODO configure slime at work
+    #+BEGIN_SRC emacs-lisp
+      (defvar *use-slime* t)
+	    (load (expand-file-name "~/quicklisp/slime-helper.el"))
+	    (setq inferior-lisp-program "sbcl")
+	    ;; Replace "sbcl" with the path to your implementation
+	    (setq inferior-lisp-program "/usr/bin/sbcl")
+
+	    (eval-and-compile (require 'slime-autoloads))
+	    (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
+(use-package slime-company
+	  :after (slime company)
+	  :config (setq slime-company-completion 'fuzzy
+			slime-company-after-completion 'slime-company-just-one-space))
+    #+END_SRC
 
 **** Rainbow delimiters
 helps identifying matching parentesis easily. In LISP it is really important
@@ -393,7 +532,12 @@ does the same as Autopais, but is already included in emacs
     (global-hl-todo-mode t))
   (setq hl-todo-keyword-faces
 	'(("TODO"   . "#ffa500")
-	  ("FIXME"  . "#ffa500")))
+	  ("FIXME"  . "#e20800")
+	  ("OPTIMIZE" . "#fce94f")
+	  ("DOCME" . "#96ff00")
+	  ("NOTE"   . "#fce94f")
+	  ("HACK"   . "#e20800")
+	  ("TEMP"   . "#e20800")))
 #+end_src
 **** multiple-cursors
      #+BEGIN_SRC emacs-lisp
@@ -416,20 +560,17 @@ does the same as Autopais, but is already included in emacs
     ;; NOTE: Set this to the folder where you keep your Git repos!x
     (setq projectile-switch-project-action #'projectile-dired))
        #+END_SRC
-**** slime
-This configuration comes from my home config and is commented at SISCOG because slime configuration comes from sc-emacs
-      #+BEGIN_SRC emacs-lisp
-	;; (defvar *use-slime* t)
-	;; (add-hook 'slime-mode-hook 'set-up-slime-ac)
-	;; (add-hook 'slime-repl-mode-hook 'set-up-slime-ac)
-	;; (eval-after-load "auto-complete"
-	;;   '(add-to-list 'ac-modes 'slime-repl-mode))
-
-	(use-package slime-company
-	  :after (slime company)
-	  :config (setq slime-company-completion 'fuzzy
-			slime-company-after-completion 'slime-company-just-one-space))
-      #+END_SRC
+**** gendoxy
+#+begin_src emacs-lisp
+  (load (expand-file-name "~/.emacs.d/gendoxy.el"))
+#+end_src
+**** projectile
+     #+begin_src emacs-lisp
+(use-package projectile
+    :init
+    ;; NOTE: Set this to the folder where you keep your Git repos!
+    (setq projectile-project-search-path '("~/projects")))
+#+end_src
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
      (use-package org
@@ -439,6 +580,13 @@ This configuration comes from my home config and is commented at SISCOG because 
        :bind (("\C-cl" . 'org-store-link)
 	      ("\C-ca" . 'org-agenda))
        :config (setq org-support-shift-select t))
+     (setq org-directory "~/git/orgfiles"
+	   org-agenda-files '("~/git/orgfiles/todo.org"))
+     (org-babel-do-load-languages
+      'org-babel-load-languages '((python . t)
+				  (fortran . t)
+				  (C . t)))
+     (setq org-babel-python-command "/usr/bin/python3")
    #+END_SRC
 **** org babel
    #+BEGIN_SRC emacs-lisp
@@ -481,6 +629,20 @@ Package useful for making emacs demonstrations
 	 :ensure t)
      #+END_SRC
 
+**** terminal emulator (vterm)
+     #+begin_src emacs-lisp
+       (use-package vterm
+           :ensure t)
+     #+end_src
+**** reddigg (reddit reader)
+     #+begin_src emacs-lisp
+       (use-package reddigg
+	 :ensure t
+	 :config
+	 (setq org-confirm-elisp-link-function nil
+	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl)))
+     #+end_src
+
 ** Functions
 *** mygrep
     #+BEGIN_SRC emacs-lisp
@@ -501,6 +663,17 @@ Package useful for making emacs demonstrations
             (compilation-start grep-command 'grep-mode (lambda (mode) "grep") nil)))
    #+END_SRC
 
+*** wheather
+    #+begin_src emacs-lisp
+      (defun weather ()
+	(interactive)
+	(let* ((wdiff (- 127 (window-total-width)))
+	       (site "wttr.in/")
+	       (location (read-string "where: " "" "" "lisboa")))
+	  (eww (concat site location))
+	  (when (> wdiff 0)
+	    (enlarge-window-horizontally wdiff))))
+    #+end_src
 * Unused Configurations
 Some packages I have used in the past, but for some reason I stoped using them, but the configuration might still be useful for someone, so I keep it here until I feel like cleaning this part.
 ** powerline
