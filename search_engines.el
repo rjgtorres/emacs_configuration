@@ -64,11 +64,6 @@
   "http://www.lispworks.com/cgi-bin/search.cgi?q=%s&t=-D--HB-"
   :keybinding "l")
 
-(when siscog-p
-  (defengine poa
-  "https://pms.siscog/main_frame_link.asp?module=defects&category=poa&id=%s&life=0"
-  :keybinding "p"))
-
 (defengine scryfall
   "https://scryfall.com/search?q=%s"
   :keybinding "s")
