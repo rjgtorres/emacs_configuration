@@ -219,6 +219,7 @@ my current theme, it has some minor changes compared to the origial, mainly the 
 	     ("C-x C-b" . 'helm-buffers-list)
 	     ("C-x b" . helm-mini)
 	     ("C-x C-g" . helm-grep-do-git-grep)))
+
     ;; (require 'helm-icons)
     ;; (customize-set-value 'helm-icons-mode->icon nil)
     ;; ;; (customize-set-value helm-icons-provider 'all-the-icons)
@@ -244,10 +245,10 @@ in windows it is needed to go to the folder where the fonts are downloaded, open
   #+BEGIN_SRC emacs-lisp
     (use-package all-the-icons
       :ensure t)
-    (use-package all-the-icons-dired
-      :ensure t
-      :init
-      (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+    ;; (use-package all-the-icons-dired
+    ;;   :ensure t
+    ;;   :init
+    ;;   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
   #+END_SRC
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
@@ -333,15 +334,14 @@ to be installed and configured, the following is the configuration that is advis
 	       ("C-x t B"   . treemacs-bookmark)
 	       ("C-x t C-t" . treemacs-find-file)
 	       ("C-x t M-t" . treemacs-find-tag)))
-
+       (require 'treemacs-icons)
        (use-package treemacs-projectile
 	 :after (treemacs projectile)
 	 :ensure t)
 
        (use-package treemacs-icons-dired
-	 :after (treemacs dired)
-	 :ensure t
-	 :config (treemacs-icons-dired-mode))
+	 :hook (dired-mode . treemacs-icons-dired-enable-once)
+	 :ensure t)
 
        (use-package treemacs-magit
 	 :after (treemacs magit)
@@ -352,147 +352,156 @@ to be installed and configured, the following is the configuration that is advis
        ;;   :ensure t
        ;;   :config (treemacs-set-scope-type 'Perspectives))
      #+END_SRC
-*** Programming helpers
-   *** Magit
-  #+BEGIN_SRC emacs-lisp
-    (use-package magit
-      :ensure t)
-  #+END_SRC
-*** company-mode
-#+begin_src emacs-lisp
-    (use-package company
-      :after lsp-mode
-      :hook (lsp-mode . company-mode)
-      :bind (:map lsp-mode-map
-	     ("<tab>" . company-indent-or-complete-common))
-      :config
-  (setq company-show-numbers            t
-	company-minimum-prefix-length   1
-	company-idle-delay              0.5
-	company-backends
-	'((company-files          ; files & directory
-	   company-keywords       ; keywords
-	   company-capf           ; what is this?
-	   company-yasnippet)
-	  (company-abbrev company-dabbrev))))
-
-(use-package company-box
-  :ensure t
-  :after company
-  :hook (company-mode . company-box-mode))
-#+end_src
-
-*** Languages
-**** Generic
-***** lsp-mode
-      #+BEGIN_SRC emacs-lisp
-	(use-package lsp-mode
-	  :ensure t
-	  :commands (lsp lsp-deferred)
-	  :init
-	  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-	  :hook ((f90-mode . lsp-mode)
-		 (python-mode . lsp-mode)
-	 (c-mode . lsp)
-		 (lsp-mode . lsp-enable-which-key-integration)))
-	(use-package helm-lsp
-	  :ensure t
-	  :config
-	  (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-	(use-package lsp-ui
-	  :ensure t
-	  :hook (lsp-mode . lsp-ui-mode)
-	  :custom
-	  (lsp-ui-doc-position 'bottom))
-	(use-package lsp-treemacs
-	  ;; project wide overview
-	  :ensure t
-	  :commands lsp-treemacs-errors-list)
-      #+END_SRC
-***** yasnippet
-      #+begin_src emacs-lisp
-	(use-package yasnippet
-	  :ensure t
-	  :init (yas-global-mode 1)
-	  ;; :hook (prog-mode-hook . yas-minor-mode)
-	  :commands yas-reload-all)
-;; This illustrates how to redefine yas-expand to S-TAB.
-(define-key yas-minor-mode-map [backtab]     'yas-expand)
-
-;; Strangely, just redefining one of the variations below won't work.
-;; All rebinds seem to be needed.
-(define-key yas-minor-mode-map [(tab)]        nil)
-(define-key yas-minor-mode-map (kbd "TAB")    nil)
-(define-key yas-minor-mode-map (kbd "<tab>")  nil)
-
-      #+end_src
-***** flycheck
-      #+begin_src emacs-lisp
-;; flycheck
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode)
-  :config
-  (setq flycheck-display-errors-function
-	#'flycheck-display-error-messages-unless-error-list)
-
-  (setq flycheck-indication-mode nil))
-
-(use-package flycheck-pos-tip
-  :ensure t
-  :after flycheck
-  :config
-  (flycheck-pos-tip-mode))
-      #+end_src
-**** Python
-      #+BEGIN_SRC emacs-lisp
-	(use-package lsp-pyright
-	  :ensure t
-	  :hook (python-mode . (lambda ()
-				 (require 'lsp-pyright)
-				 (lsp))))  ; or lsp-deferred
-      #+END_SRC
-**** Fortran
-      #+BEGIN_SRC emacs-lisp
-	(add-hook 'f90-mode-hook 'lsp)
-      #+END_SRC
-**** C
+**** COMMENT helm-icons
      #+begin_src emacs-lisp
-       (use-package ccls
+       (use-package helm-icons
 	 :ensure t
-	 :hook ((c-mode c++-mode objc-mode cuda-mode) .
-		(lambda () (require 'ccls) (lsp)))
 	 :config
-	 (setq ccls-executable "/usr/bin/ccls")
-	 (setq ccls-initialization-options
-	       '(:index (:comments 2) :completion (:detailedLabel t))))
-
- ;; Indentation
-       (setq c-default-style "linux"
-	     c-basic-offset 4
-	     c-label-offset 0
-	     tab-width 4
-	     indent-tabs-mode nil)
-
-       ;; (add-hook 'c-mode-hook 'lsp)
+	 (setf helm-icons-mode->icon nil)
+	 (setf helm-icons-provider 'all-the-icons)
+	 (helm-icons-enable))			;
      #+end_src
-**** Lisp
-***** slime
-      # TODO configure slime at work
-    #+BEGIN_SRC emacs-lisp
-      (defvar *use-slime* t)
-	    (load (expand-file-name "~/quicklisp/slime-helper.el"))
-	    (setq inferior-lisp-program "sbcl")
-	    ;; Replace "sbcl" with the path to your implementation
-	    (setq inferior-lisp-program "/usr/bin/sbcl")
+*** Programming helpers
+**** Magit
+   #+BEGIN_SRC emacs-lisp
+     (use-package magit
+       :ensure t)
+   #+END_SRC
+**** company-mode
+ #+begin_src emacs-lisp
+     (use-package company
+       :after lsp-mode
+       :hook (lsp-mode . company-mode)
+       :bind (:map lsp-mode-map
+	      ("<tab>" . company-indent-or-complete-common))
+       :config
+   (setq company-show-numbers            t
+	 company-minimum-prefix-length   1
+	 company-idle-delay              0.5
+	 company-backends
+	 '((company-files          ; files & directory
+	    company-keywords       ; keywords
+	    company-capf           ; what is this?
+	    company-yasnippet)
+	   (company-abbrev company-dabbrev))))
 
-	    (eval-and-compile (require 'slime-autoloads))
-	    (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
-(use-package slime-company
-	  :after (slime company)
-	  :config (setq slime-company-completion 'fuzzy
-			slime-company-after-completion 'slime-company-just-one-space))
-    #+END_SRC
+ (use-package company-box
+   :ensure t
+   :after company
+   :hook (company-mode . company-box-mode))
+ #+end_src
+
+**** Languages
+***** Generic
+****** lsp-mode
+       #+BEGIN_SRC emacs-lisp
+	 (use-package lsp-mode
+	   :ensure t
+	   :commands (lsp lsp-deferred)
+	   :init
+	   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+	   :hook ((f90-mode . lsp-mode)
+		  (python-mode . lsp-mode)
+	  (c-mode . lsp)
+		  (lsp-mode . lsp-enable-which-key-integration)))
+	 (use-package helm-lsp
+	   :ensure t
+	   :config
+	   (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+	 (use-package lsp-ui
+	   :ensure t
+	   :hook (lsp-mode . lsp-ui-mode)
+	   :custom
+	   (lsp-ui-doc-position 'bottom))
+	 (use-package lsp-treemacs
+	   ;; project wide overview
+	   :ensure t
+	   :commands lsp-treemacs-errors-list)
+       #+END_SRC
+****** yasnippet
+       #+begin_src emacs-lisp
+	 (use-package yasnippet
+	   :ensure t
+	   :init (yas-global-mode 1)
+	   ;; :hook (prog-mode-hook . yas-minor-mode)
+	   :commands yas-reload-all)
+ ;; This illustrates how to redefine yas-expand to S-TAB.
+ (define-key yas-minor-mode-map [backtab]     'yas-expand)
+
+ ;; Strangely, just redefining one of the variations below won't work.
+ ;; All rebinds seem to be needed.
+ (define-key yas-minor-mode-map [(tab)]        nil)
+ (define-key yas-minor-mode-map (kbd "TAB")    nil)
+ (define-key yas-minor-mode-map (kbd "<tab>")  nil)
+
+       #+end_src
+****** flycheck
+       #+begin_src emacs-lisp
+ ;; flycheck
+ (use-package flycheck
+   :ensure t
+   :init (global-flycheck-mode)
+   :config
+   (setq flycheck-display-errors-function
+	 #'flycheck-display-error-messages-unless-error-list)
+
+   (setq flycheck-indication-mode nil))
+
+ (use-package flycheck-pos-tip
+   :ensure t
+   :after flycheck
+   :config
+   (flycheck-pos-tip-mode))
+       #+end_src
+***** Python
+       #+BEGIN_SRC emacs-lisp
+	 (use-package lsp-pyright
+	   :ensure t
+	   :hook (python-mode . (lambda ()
+				  (require 'lsp-pyright)
+				  (lsp))))  ; or lsp-deferred
+       #+END_SRC
+***** Fortran
+       #+BEGIN_SRC emacs-lisp
+	 (add-hook 'f90-mode-hook 'lsp)
+       #+END_SRC
+***** C
+      #+begin_src emacs-lisp
+	(use-package ccls
+	  :ensure t
+	  :hook ((c-mode c++-mode objc-mode cuda-mode) .
+		 (lambda () (require 'ccls) (lsp)))
+	  :config
+	  (setq ccls-executable "/usr/bin/ccls")
+	  (setq ccls-initialization-options
+		'(:index (:comments 2) :completion (:detailedLabel t))))
+
+  ;; Indentation
+	(setq c-default-style "linux"
+	      c-basic-offset 4
+	      c-label-offset 0
+	      tab-width 4
+	      indent-tabs-mode nil)
+
+	;; (add-hook 'c-mode-hook 'lsp)
+      #+end_src
+***** Lisp
+****** slime
+       # TODO configure slime at work
+     #+BEGIN_SRC emacs-lisp
+       (defvar *use-slime* t)
+	     (load (expand-file-name "~/quicklisp/slime-helper.el"))
+	     (setq inferior-lisp-program "sbcl")
+	     ;; Replace "sbcl" with the path to your implementation
+	     (setq inferior-lisp-program "/usr/bin/sbcl")
+
+	     (eval-and-compile (require 'slime-autoloads))
+	     (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
+ (use-package slime-company
+	   :after (slime company)
+	   :config (setq slime-company-completion 'fuzzy
+			 slime-company-after-completion 'slime-company-just-one-space))
+     #+END_SRC
 
 **** Rainbow delimiters
 helps identifying matching parentesis easily. In LISP it is really important
@@ -550,26 +559,20 @@ does the same as Autopais, but is already included in emacs
      #+END_SRC
 **** projectile
 #+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :ensure t
-    :config (projectile-mode)
-    :custom ((projectile-completion-system 'helm))
-    :bind-keymap
-    ("C-c p" . projectile-command-map)
-    :init
-    ;; NOTE: Set this to the folder where you keep your Git repos!x
-    (setq projectile-switch-project-action #'projectile-dired))
+    (use-package projectile
+      :ensure t
+      :config (projectile-mode)
+      :custom ((projectile-completion-system 'helm))
+      :bind-keymap
+      ("C-c p" . projectile-command-map)
+      :init
+      ;; NOTE: Set this to the folder where you keep your Git repos!x
+      (setq projectile-switch-project-action #'projectile-dired)
+      (setq projectile-project-search-path '("~/projects")))
        #+END_SRC
 **** gendoxy
 #+begin_src emacs-lisp
   (load (expand-file-name "~/.emacs.d/gendoxy.el"))
-#+end_src
-**** projectile
-     #+begin_src emacs-lisp
-(use-package projectile
-    :init
-    ;; NOTE: Set this to the folder where you keep your Git repos!
-    (setq projectile-project-search-path '("~/projects")))
 #+end_src
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
@@ -642,7 +645,14 @@ Package useful for making emacs demonstrations
 	 (setq org-confirm-elisp-link-function nil
 	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl)))
      #+end_src
-
+**** pdf-tools
+     #+begin_src emacs-lisp
+       (use-package pdf-tools
+	 :ensure t
+	 :config (pdf-loader-install)
+	 :hook (pdf-view-mode . (lambda ()
+ 				  (pdf-tools-enable-minor-modes))))
+     #+end_src
 ** Functions
 *** mygrep
     #+BEGIN_SRC emacs-lisp
@@ -674,7 +684,7 @@ Package useful for making emacs demonstrations
 	  (when (> wdiff 0)
 	    (enlarge-window-horizontally wdiff))))
     #+end_src
-* Unused Configurations
+* COMMENT Unused Configurations
 Some packages I have used in the past, but for some reason I stoped using them, but the configuration might still be useful for someone, so I keep it here until I feel like cleaning this part.
 ** powerline
  #+BEGIN_SRC emacs-lisp
@@ -708,3 +718,7 @@ automatically completes words in programming modes
    ;; (setq centaur-tabs-modified-marker "*")
 
  #+END_SRC
+
+
+
+
