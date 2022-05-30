@@ -588,8 +588,13 @@ does the same as Autopais, but is already included in emacs
      (org-babel-do-load-languages
       'org-babel-load-languages '((python . t)
 				  (fortran . t)
-				  (C . t)))
+				  (C . t)
+				  (lisp . t)))
      (setq org-babel-python-command "/usr/bin/python3")
+     (use-package helm-org
+       :ensure t)
+     (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+     (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
    #+END_SRC
 **** org babel
    #+BEGIN_SRC emacs-lisp
@@ -643,7 +648,7 @@ Package useful for making emacs demonstrations
 	 :ensure t
 	 :config
 	 (setq org-confirm-elisp-link-function nil
-	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl)))
+	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend)))
      #+end_src
 **** pdf-tools
      #+begin_src emacs-lisp
@@ -651,12 +656,13 @@ Package useful for making emacs demonstrations
 	 :ensure t
 	 :config (pdf-loader-install)
 	 :hook (pdf-view-mode . (lambda ()
- 				  (pdf-tools-enable-minor-modes))))
+				  (pdf-tools-enable-minor-modes))))
+
      #+end_src
 ** Functions
 *** mygrep
     #+BEGIN_SRC emacs-lisp
-    (defun mygrep ()
+    (defun mygrep-lisp ()
       "Recursively grep from current file directory, ignoring comments."
       (interactive)
       (let* ((search-term (read-string "search term: "))
@@ -666,7 +672,7 @@ Package useful for making emacs demonstrations
              (grep-command
 	       (concat
 	         grep-program
-	         " -inIr --include=*.{lisp,cl,bil,el,js,ts,css,xsl,html,dic} -e \"^[^;]*"
+	         " -inIr '--include=*.'{lisp,cl,bil,el,asd,dic} -e \"^[^;]*"
 	         search-term
 		 "\" "
 		 search-path)))
