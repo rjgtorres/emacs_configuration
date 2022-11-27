@@ -15,7 +15,7 @@
    #+BEGIN_SRC emacs-lisp
      (if win-p
 	 (set-face-attribute 'default nil :family "Consolas" :height 110)
-       (set-face-attribute 'default nil :family "Liberation mono" :height 105))
+       (set-face-attribute 'default nil :family "Ubuntu mono" :height 110))
    #+END_SRC
 ** general basic emacs configuration
 *** Keybindings
@@ -395,29 +395,39 @@ to be installed and configured, the following is the configuration that is advis
 ***** Generic
 ****** lsp-mode
        #+BEGIN_SRC emacs-lisp
-	 (use-package lsp-mode
-	   :ensure t
-	   :commands (lsp lsp-deferred)
-	   :init
-	   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-	   :hook ((f90-mode . lsp-mode)
-		  (python-mode . lsp-mode)
-	  (c-mode . lsp)
-		  (lsp-mode . lsp-enable-which-key-integration)))
-	 (use-package helm-lsp
-	   :ensure t
-	   :config
-	   (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-	 (use-package lsp-ui
-	   :ensure t
-	   :hook (lsp-mode . lsp-ui-mode)
-	   :custom
-	   (lsp-ui-doc-position 'bottom))
-	 (use-package lsp-treemacs
-	   ;; project wide overview
-	   :ensure t
-	   :commands lsp-treemacs-errors-list)
+		  (use-package lsp-mode
+		    :ensure t
+		    :commands (lsp lsp-deferred)
+		    :init
+		    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+		    :hook ((f90-mode . lsp-mode)
+			   (python-mode . lsp-mode)
+			   (c-mode . lsp)
+			   (c++-mode . lsp)
+			   (lsp-mode . lsp-enable-which-key-integration)
+			   (lsp-mode . lsp-headerline-breadcrumb-mode)))
+		  (use-package helm-lsp
+		    :ensure t
+		    :config
+		    (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+		  (use-package lsp-ui
+		    :ensure t
+		    :hook (lsp-mode . lsp-ui-mode)
+		    :custom
+		    (lsp-ui-doc-position 'bottom))
+		  (use-package lsp-treemacs
+		    ;; project wide overview
+		    :ensure t
+		    :commands lsp-treemacs-errors-list)
        #+END_SRC
+****** dap-mode
+#+begin_src emacs-lisp
+  (use-package dap-mode
+    :ensure t)
+
+  (dap-auto-configure-mode 1)
+
+#+end_src
 ****** yasnippet
        #+begin_src emacs-lisp
 	 (use-package yasnippet
@@ -567,7 +577,7 @@ does the same as Autopais, but is already included in emacs
       ("C-c p" . projectile-command-map)
       :init
       ;; NOTE: Set this to the folder where you keep your Git repos!x
-      (setq projectile-switch-project-action #'projectile-dired)
+      (setq projectile-switch-project-action #'projectile-find-dir)
       (setq projectile-project-search-path '("~/projects")))
        #+END_SRC
 **** gendoxy
@@ -576,31 +586,30 @@ does the same as Autopais, but is already included in emacs
 #+end_src
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
-     (use-package org
-       :init
-       (setq org-startup-folded 'content
-	     org-log-done t)
-       :bind (("\C-cl" . 'org-store-link)
-	      ("\C-ca" . 'org-agenda))
-       :config (setq org-support-shift-select t))
-     (setq org-directory "~/git/orgfiles"
-	   org-agenda-files '("~/git/orgfiles/todo.org"))
-     (org-babel-do-load-languages
-      'org-babel-load-languages '((python . t)
-				  (fortran . t)
-				  (C . t)
-				  (lisp . t)))
-     (setq org-babel-python-command "/usr/bin/python3")
-     (use-package helm-org
-       :ensure t)
-     (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
-     (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
+	  (use-package org
+	    :init
+	    (setq org-startup-folded 'content
+		  org-log-done t)
+	    :bind (("\C-cl" . 'org-store-link)
+		   ("\C-ca" . 'org-agenda))
+	    :config (setq org-support-shift-select t))
+	  (setq org-directory "~/Dropbox/orgfiles"
+		org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
+					 (file-expand-wildcards "~/Dropbox/orgfiles/denotes/*_journal*")))
+	  (setq org-babel-python-command "/usr/bin/python3")
+	  (use-package helm-org
+	    :ensure t)
+	  (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+	  (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
    #+END_SRC
 **** org babel
    #+BEGIN_SRC emacs-lisp
-     (org-babel-do-load-languages
-      'org-babel-load-languages '((python . t) (shell . t) (lisp . t)))
-
+          (org-babel-do-load-languages
+                'org-babel-load-languages '((python . t)
+                                            (fortran . t)
+                                            (C . t)
+                                            (lisp . t)
+                                            (shell . t)))
    #+END_SRC
 
 **** org-superstar
@@ -610,6 +619,15 @@ mainly eye candy but at least I don't need to see so many * and so org mode is m
       :ensure t
       :hook (org-mode . (lambda () (org-superstar-mode 1))))
    #+END_SRC
+
+**** denote
+#+begin_src emacs-lisp
+    (use-package denote
+      :ensure t
+      :config (setq denote-directory (expand-file-name "~/Dropbox/orgfiles/denotes/")
+		    denote-known-keywords '("emacs" "programming" "journal")
+		    denote-date-prompt-use-org-read-date t))
+#+end_src
 *** random packages
 **** add search engines to search
 search several places from emacs
@@ -648,7 +666,7 @@ Package useful for making emacs demonstrations
 	 :ensure t
 	 :config
 	 (setq org-confirm-elisp-link-function nil
-	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend)))
+	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt)))
      #+end_src
 **** pdf-tools
      #+begin_src emacs-lisp
@@ -724,6 +742,7 @@ automatically completes words in programming modes
    ;; (setq centaur-tabs-modified-marker "*")
 
  #+END_SRC
+
 
 
 

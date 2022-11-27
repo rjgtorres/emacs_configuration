@@ -40,7 +40,8 @@
 ;;   "http://pretty-rfc.herokuapp.com/search?q=%s")
 
 (defengine stack-overflow
-  "https://stackoverflow.com/search?q=%s")
+  "https://stackoverflow.com/search?q=%s"
+  :keybinding "k")
 
 (defengine twitter
   "https://twitter.com/search?q=%s")
