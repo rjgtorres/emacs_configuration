@@ -591,6 +591,17 @@ does the same as Autopais, but is already included in emacs
        :config (setq org-support-shift-select t))
      (setq org-directory "~/Dropbox/orgfiles")
      (setf org-agenda-tags-column -100)
+     (setq org-todo-keywords
+	'((sequence "TODO"
+		    "MAYBE"
+		    "NEXT"
+		    "STARTED"
+		    "WAITING"
+		    "DELEGATED"
+		    "MEETING"
+		    "|"
+		    "DONE"
+		    "CANCELLED")))
      (setf org-group-tags nil)
      (setf org-tag-persistent-alist '(("personal" . ?p)
 				      ("houses" . ?h)
@@ -758,7 +769,7 @@ Package useful for making emacs demonstrations
       (goto-char (point-max))
       (while
 	  (re-search-backward
-	   "^\\*\\* \\(TODO\\|SCHEDULED\\|DEADLINE\\)" nil t)
+	   "^\\*\\* \\(TODO\\|MAYBE\\|NEXT\\|STARTED\\|WAITING\\|DELEGATED\\|MEETING\\|SCHEDULED\\|DEADLINE\\)" nil t)
 	(org-archive-subtree))))
 
   (defun move-todos()
@@ -771,7 +782,7 @@ Package useful for making emacs demonstrations
       (save-buffer)
       (kill-buffer (buffer-name))))
 
-  (defun my-denote-journal ()
+  (defun my-denote-journal-today ()
     "Create an entry tagged 'journal' with the date as its title."
     (interactive)
     (let* ((today (format-time-string "%Y%m%d"))
@@ -781,7 +792,7 @@ Package useful for making emacs demonstrations
 	  (find-file filename)
 	(progn
 	  (denote
-	   (format-time-string "%A %e %B %Y")   ; format like Tuesday 14 June 2022
+	   (format-time-string "%Yw%W-%a %e %b")   ; format like 2022w48-Tue 29 Nov
 	   '("journal")
 	   nil
 	   "~/Denotes")
@@ -790,7 +801,23 @@ Package useful for making emacs demonstrations
 	  (move-todos)
 	  (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
 					 (journals_to_org_agenda)))))))
+
+  (defun my-denote-journal-date()
+  (declare (interactive-only t))
+  (interactive)
+  (let* ((date (org-read-date nil t))
+	 (filename (car (journal-day-exists-p (format-time-string "%Y%m%d" date)))))
+    (if filename
+	(find-file filename)
+      (progn
+	(denote
+	 (format-time-string "%Yw%W-%a %e %b" date)   ; format like Tuesday 14 June 2022
+	 '("journal")
+	 nil
+	 "~/Denotes")
+	(insert "* THOUGHTS\n\n* IDEAS\n\n* CODE\n\n* TASKS\n - Remember to call:\n\n (move-todos)")))))
 #+end_src
+
 * COMMENT Unused Configurations
 Some packages I have used in the past, but for some reason I stoped using them, but the configuration might still be useful for someone, so I keep it here until I feel like cleaning this part.
 ** powerline
