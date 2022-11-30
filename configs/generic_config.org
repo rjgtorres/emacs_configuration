@@ -9,9 +9,15 @@
 ** Windows configuration
 *** set a decent font in windows
    #+BEGIN_SRC emacs-lisp
-     (if win-p
-	 (set-face-attribute 'default nil :family "Consolas" :height 110)
-       (set-face-attribute 'default nil :family "Ubuntu mono" :height 110))
+     ;; this fonts need to be installed, copy them to ~/.local/share/fonts
+     (defvar my/variable-width-font "Source Serif Pro"
+       "The font to use for variable-pitch (document) text.")
+     (defvar my/fixed-width-font "Iosevka Term Slab Md Ex"
+       "The font to use for variable-pitch (document) text.")
+
+     (set-face-attribute 'default nil :font my/fixed-width-font :weight 'medium :height 100)
+     (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'medium :height 100)
+     (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'medium :height 1.2)
    #+END_SRC
 ** general basic emacs configuration
 *** Keybindings
@@ -592,16 +598,20 @@ does the same as Autopais, but is already included in emacs
      (setq org-directory "~/Dropbox/orgfiles")
      (setf org-agenda-tags-column -100)
      (setq org-todo-keywords
-	'((sequence "TODO"
+	'((sequence "TODO(t)"
 		    "MAYBE"
 		    "NEXT"
 		    "STARTED"
 		    "WAITING"
 		    "DELEGATED"
-		    "MEETING"
 		    "|"
-		    "DONE"
-		    "CANCELLED")))
+		    "DONE(d)"
+		    "CANCELLED(c)")
+	  (sequence 
+	       "MEETING(m)"
+	       "|"
+	       "DONE(d)"
+	       "CANCELLED(c)")))
      (setf org-group-tags nil)
      (setf org-tag-persistent-alist '(("personal" . ?p)
 				      ("houses" . ?h)
@@ -614,7 +624,87 @@ does the same as Autopais, but is already included in emacs
        :ensure t)
      (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
      (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
+
+     ;; Resize Org headings
+(dolist (face '((org-level-1 . 1.2)
+                (org-level-2 . 1.1)
+                (org-level-3 . 1.05)
+                (org-level-4 . 1.0)
+                (org-level-5 . 0.98)
+                (org-level-6 . 0.96)
+                (org-level-7 . 0.94)
+                (org-level-8 . 0.92)))
+  (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+
+(set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+
+(set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+(set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+(set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+(set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
    #+END_SRC
+**** org-present
+This configuration is based in a presentation by Daviwil in this [[https://www.youtube.com/watch?v=SCPoF1PTZpI][video]]
+#+begin_src emacs-lisp
+  (use-package org-present
+    :ensure t)
+
+  (defun my/org-present-prepare-slide (buffer-name heading)
+    ;; Show only top-level headlines
+    (org-overview)
+
+    ;; Unfold the current entry
+    (org-show-entry)
+
+    ;; Show only direct subheadings of the slide but don't expand them
+    (org-show-children))
+
+  (defun my/org-present-start ()
+    ;; Tweak font sizes
+    (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
+				       (header-line (:height 4.0) variable-pitch)
+				       (org-document-title (:height 1.75) org-document-title)
+				       (org-code (:height 1.55) org-code)
+				       (org-verbatim (:height 1.55) org-verbatim)
+				       (org-block (:height 1.25) org-block)
+				       (org-block-begin-line (:height 0.7) org-block)))
+
+    ;; Set a blank header line string to create blank space at the top
+    (setq header-line-format " ")
+
+    ;; Display inline images automatically
+    (org-display-inline-images)
+
+    ;; Center the presentation and wrap lines
+    (visual-fill-column-mode 1)
+    (visual-line-mode 1))
+
+  (defun my/org-present-end ()
+    ;; Reset font customizations
+    (setq-local face-remapping-alist '((default fixed-pitch default)))
+
+    ;; Clear the header line string so that it isn't displayed
+    (setq header-line-format nil)
+
+    ;; Stop displaying inline images
+    (org-remove-inline-images)
+
+    ;; Stop centering the document
+    (visual-fill-column-mode 0)
+    (visual-line-mode 0))
+
+  ;; Turn on variable pitch fonts in Org Mode buffers
+  (add-hook 'org-mode-hook 'variable-pitch-mode)
+
+  ;; Register hooks with org-present
+  (add-hook 'org-present-mode-hook 'my/org-present-start)
+  (add-hook 'org-present-mode-quit-hook 'my/org-present-end)
+  (add-hook 'org-present-after-navigate-functions 'my/org-present-prepare-slide)
+#+end_src
 **** denote
 #+begin_src emacs-lisp
   (use-package denote
@@ -641,6 +731,36 @@ mainly eye candy but at least I don't need to see so many * and so org mode is m
       :hook (org-mode . (lambda () (org-superstar-mode 1))))
    #+END_SRC
 
+**** calendar
+#+begin_src emacs-lisp
+  (setq holiday-general-holidays nil
+	holiday-christian-holidays nil
+	holiday-hebrew-holidays nil
+	holiday-islamic-holidays nil
+	holiday-bahai-holidays nil
+	holiday-oriental-holidays nil
+	holiday-solar-holidays nil)
+
+  (setq holiday-local-holidays '((holiday-fixed 1 1 "Dia ano novo")
+				 (holiday-fixed 2 14 "Valentine's Day")
+				 (holiday-easter-etc -47 "Carnaval")
+				 (holiday-easter-etc -2 "Sexta-feira santa")
+				 (holiday-easter-etc 0 "Páscoa")
+				 (holiday-easter-etc 60 "Corpo de Cristo")
+				 (holiday-fixed 3 19 "Dia do Pai")
+				 (holiday-fixed 4 25 "25 Abril")
+				 (holiday-fixed 5 1 "Dia trabalhador")
+				 (holiday-float 5 0 1 "Dia da Mãe")
+				 (holiday-fixed 6 1 "Dia da criança")
+				 (holiday-fixed 6 10 "Dia Portugal")
+				 (holiday-fixed 6 13 "Dia S António (Lisboa)")
+				 (holiday-fixed 8 15 "Dia S Assunção")
+				 (holiday-fixed 10 5 "Implantação da républica")
+				 (holiday-fixed 11 1 "Todos os santos")
+				 (holiday-fixed 12 1 "Restauração da Independência")
+				 (holiday-fixed 12 8 "Dia Imaculada conceição")
+				 (holiday-fixed 12 25 "Christmas")))
+#+end_src
 *** random packages
 **** add search engines to search
 search several places from emacs
@@ -690,6 +810,12 @@ Package useful for making emacs demonstrations
 				  (pdf-tools-enable-minor-modes))))
 
      #+end_src
+**** rainbow-mode
+this is a mode to show colors in hex codes
+#+begin_src emacs-lisp
+  (use-package rainbow-mode
+    :ensure t)
+#+end_src
 ** Functions
 *** mygrep
     #+BEGIN_SRC emacs-lisp
