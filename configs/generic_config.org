@@ -861,19 +861,19 @@ this is a mode to show colors in hex codes
 							      (calendar-current-date)))
 							    (make-decoded-time :month (- 1))))))
 	   (all_journals (sort
-			  (directory-files (denote-directory) nil "^[0-9].*_journal.*org$")
+			  (directory-files denote-directory nil "^[0-9].*_journal.*org$")
 			  #'string>))
 	   (out_list nil))
       (dolist (journal all_journals out_list)
 	(when (string> (substring journal 0 8) min_date)
-	  (push (concat (denote-directory) journal) out_list)))))
+	  (push (concat denote-directory journal) out_list)))))
 
   (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
 				 (journals_to_org_agenda)))
 
   (defun journal-day-exists-p ( target )
     "check if journal for a day already exists"
-    (file-expand-wildcards (concat (denote-directory) target "*_journal*.org")))
+    (file-expand-wildcards (concat denote-directory target "*_journal*.org")))
 
   (defun find-previous-journal ()
     "Find most recent journal"
@@ -899,7 +899,7 @@ this is a mode to show colors in hex codes
 	(org-archive-subtree))))
 
   (defun move-todos()
-    (let ((filename (concat (denote-directory)
+    (let ((filename (concat denote-directory
 			    (find-previous-journal))))
       (find-file filename)
       (my-refile-tasks (car
