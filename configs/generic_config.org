@@ -110,7 +110,7 @@
     #+END_SRC
 *** set window name as current buffer
     #+BEGIN_SRC emacs-lisp
-    (setq-default frame-title-format '("%b [%m]"))
+    (setq-default frame-title-format '((:eval (format-time-string "%H:%M %A %d %B")) " - %b [%m]"))
     #+END_SRC
 *** hide fringe
  #+begin_src emacs-lisp
@@ -179,6 +179,11 @@
   #+END_SRC
 
 *** Customize look and feel
+**** transparency
+#+begin_src emacs-lisp
+ (set-frame-parameter (selected-frame) 'alpha-background '(95 . 50))
+ (add-to-list 'default-frame-alist '(alpha-background . (95 . 50)))
+#+end_src
 **** diminish
 package to hide minor modes from modeline
 I believe that by using the doom modeline this package becomes not necessary
@@ -354,6 +359,11 @@ to be installed and configured, the following is the configuration that is advis
        ;;   :ensure t
        ;;   :config (treemacs-set-scope-type 'Perspectives))
      #+END_SRC
+**** dired
+the next directive enables opening a folder in the same buffer, without generating a new one, with the letter "a"
+#+begin_src emacs-lisp
+  (put 'dired-find-alternate-file 'disabled nil)
+#+end_src
 **** COMMENT helm-icons
      #+begin_src emacs-lisp
        (use-package helm-icons
@@ -588,69 +598,71 @@ does the same as Autopais, but is already included in emacs
 #+end_src
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
-	  (use-package org
-	    :init
-	    (setq org-startup-folded 'content
-		  org-log-done t)
-	    :bind (("\C-cl" . 'org-store-link)
-		   ("\C-ca" . 'org-agenda))
-	    :config (setq org-support-shift-select t))
-	  (setq org-directory "~/Dropbox/orgfiles")
-	  (setf org-agenda-tags-column -100)
-	  (setq org-todo-keywords
-	     '((sequence "TODO(t)"
-			 "MAYBE"
-			 "NEXT"
-			 "STARTED"
-			 "WAITING"
-			 "DELEGATED"
+	       (use-package org
+		 :init
+		 (setq org-startup-folded 'content
+		       org-log-done t)
+		 :bind (("\C-cl" . 'org-store-link)
+			("\C-ca" . 'org-agenda))
+		 :config (setq org-support-shift-select t))
+	       (setq org-directory "~/Dropbox/orgfiles")
+	       (setf org-agenda-tags-column -100)
+	       (setq org-todo-keywords
+		  '((sequence "TODO(t)"
+			      "MAYBE"
+			      "NEXT"
+			      "STARTED"
+			      "WAITING"
+			      "DELEGATED"
+			      "|"
+			      "DONE(d)"
+			      "CANCELLED(c)")
+		    (sequence
+			 "MEETING(m)"
 			 "|"
 			 "DONE(d)"
-			 "CANCELLED(c)")
-	       (sequence 
-		    "MEETING(m)"
-		    "|"
-		    "DONE(d)"
-		    "CANCELLED(c)")))
-	  (setf org-group-tags nil)
-	  (setf org-tag-persistent-alist '(("personal" . ?p)
-					   ("houses" . ?h)
-					   ("vacations" . ?v)
-					   ("management" . ?m)
-					   ("csw" . ?w)
-					   ("coding" . ?c)))
-	  (setq org-babel-python-command "/usr/bin/python3")
-	  (use-package helm-org
-	    :ensure t)
-	  (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
-	  (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
+			 "CANCELLED(c)")))
+	       (setf org-group-tags nil)
+	       (setf org-tag-persistent-alist '(("personal" . ?p)
+						("houses" . ?h)
+						("vacations" . ?v)
+						("management" . ?m)
+						("csw" . ?w)
+						("coding" . ?c)
+						("configuration" . ?f)))
+	       (setq org-babel-python-command "/usr/bin/python3")
+	       (use-package helm-org
+		 :ensure t)
+	       (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+	       (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
 
-	  ;; Resize Org headings
-     (dolist (face '((org-level-1 . 1.2)
-		     (org-level-2 . 1.1)
-		     (org-level-3 . 1.05)
-		     (org-level-4 . 1.0)
-		     (org-level-5 . 0.98)
-		     (org-level-6 . 0.96)
-		     (org-level-7 . 0.94)
-		     (org-level-8 . 0.92)))
-       (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
+	       ;; Resize Org headings
+	  (dolist (face '((org-level-1 . 1.2)
+			  (org-level-2 . 1.1)
+			  (org-level-3 . 1.05)
+			  (org-level-4 . 1.0)
+			  (org-level-5 . 0.98)
+			  (org-level-6 . 0.96)
+			  (org-level-7 . 0.94)
+			  (org-level-8 . 0.92)))
+	    (set-face-attribute (car face) nil :font my/variable-width-font :weight 'medium :height (cdr face)))
 
-     (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
+	  (set-face-attribute 'org-document-title nil :font my/variable-width-font :weight 'bold :height 1.3)
 
-     (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
-     (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-     (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
-     (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
-     (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
-     (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
-     (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
-     (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-     (setq org-startup-folded t)
-     (setq org-startup-with-inline-images t)
+	  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch)
+	  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+	  (set-face-attribute 'org-formula nil :inherit 'fixed-pitch)
+	  (set-face-attribute 'org-code nil :inherit '(shadow fixed-pitch))
+	  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch))
+	  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
+	  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
+	  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
+	  (setq org-startup-folded t)
+	  (setq org-startup-with-inline-images t)
    #+END_SRC
 **** org-present
 This configuration is based in a presentation by Daviwil in this [[https://www.youtube.com/watch?v=SCPoF1PTZpI][video]]
+***** TODO needs to be properlly worked out to my needs
 #+begin_src emacs-lisp
   (use-package org-present
     :ensure t)
