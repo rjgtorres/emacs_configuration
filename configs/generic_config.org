@@ -36,7 +36,7 @@
      #+END_SRC
 **** kill buffer
      #+BEGIN_SRC emacs-lisp
-       (global-set-key (kbd "C-q") 'kill-this-buffer)
+       (global-set-key (kbd "C-q") 'kill-current-buffer)
      #+END_SRC
 **** move window 2 lines
      #+BEGIN_SRC emacs-lisp
@@ -76,9 +76,7 @@
     # #+END_SRC
 *** y or n are sufficient
     #+BEGIN_SRC emacs-lisp
-      (if (version< emacs-version "28")
-	  (fset 'yes-or-no-p 'y-or-n-p)
-	(setf use-short-answers t))
+      (setf use-short-answers t)
     #+END_SRC
 *** selection and deletion configuration
     when you mark a region, you can delete it or replace it as in other Windows programs:
@@ -129,9 +127,8 @@
 #+end_src
 *** Delete trailing whitespace on saving
      #+BEGIN_SRC emacs-lisp
-       (use-package ws-butler
-	 :ensure t
-	 :hook (prog-mode-hook 'ws-butler-mode))
+       ;; (use-package ws-butler
+       ;;   :hook (prog-mode-hook 'ws-butler-mode))
      #+END_SRC
 
 *** prettify symbols
@@ -183,11 +180,6 @@
   #+END_SRC
 
 *** Customize look and feel
-**** transparency
-#+begin_src emacs-lisp
- (set-frame-parameter (selected-frame) 'alpha-background '(95 . 50))
- (add-to-list 'default-frame-alist '(alpha-background . (95 . 50)))
-#+end_src
 **** diminish
 package to hide minor modes from modeline
 I believe that by using the doom modeline this package becomes not necessary
@@ -199,7 +191,6 @@ I believe that by using the doom modeline this package becomes not necessary
 **** Doom modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
-    :ensure t
     :hook (after-init . doom-modeline-mode))
 #+end_src
 **** moe theme
@@ -215,37 +206,36 @@ my current theme, it has some minor changes compared to the origial, mainly the 
 **** helm
   #+BEGIN_SRC emacs-lisp
     (use-package helm
-      :ensure t
       :diminish helm-mode
       :config
       (helm-mode 1)
       (helm-autoresize-mode 1)
       (setq helm-autoresize-max-height 40
-	    helm-autoresize-min-height 20
-	    helm-split-window-in-side-p t
-	    helm-mode-fuzzy-match t
-	    helm-completion-in-region-fuzzy-match t)
+            helm-autoresize-min-height 20
+            helm-split-window-in-side-p t
+            helm-mode-fuzzy-match t
+            helm-completion-in-region-fuzzy-match t)
       :bind (("M-x" . 'helm-M-x)
-	     ("C-x C-f" . 'helm-find-files)
-	     ("C-x C-b" . 'helm-buffers-list)
-	     ("C-x b" . helm-mini)
-	     ("C-x C-g" . helm-grep-do-git-grep)))
+             ("C-x C-f" . 'helm-find-files)
+             ("C-x C-b" . 'helm-buffers-list)
+             ("C-x b" . helm-mini)
+             ("C-x C-g" . helm-grep-do-git-grep)))
 
     ;; (require 'helm-icons)
     ;; (customize-set-value 'helm-icons-mode->icon nil)
-    ;; ;; (customize-set-value helm-icons-provider 'all-the-icons)
-    ;; (helm-icons-enable)
-    (use-package helm-slime
-      :ensure t
-      :init (global-helm-slime-mode))
+    ;; ;; (customize-set-value helm-icons-;; provider 'all-the-icons)
+    ;; ;; (helm-icons-enable)
+
+    ;; TODO reload this!!
+    ;; (use-package helm-slime
+    ;;   :init (global-helm-slime-mode))
+
 
   #+END_SRC
 **** which-key
     #+BEGIN_SRC emacs-lisp
       (use-package which-key
-      :ensure t
       :init (which-key-mode)
-      ;; :diminish which-key-mode
       :config
       (setq which-key-ide-delay 0.5))
     #+END_SRC
@@ -254,26 +244,24 @@ package to display icons
 In a new installation it is needed to install the icons to be displayed: M-x all-the-icons-install-fonts
 in windows it is needed to go to the folder where the fonts are downloaded, open and install those fonts
   #+BEGIN_SRC emacs-lisp
-    (use-package all-the-icons
-      :ensure t)
-    ;; (use-package all-the-icons-dired
-    ;;   :ensure t
-    ;;   :init
-    ;;   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+    (use-package all-the-icons)
+    (use-package all-the-icons-dired
+      :ensure t
+      :init
+      (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
   #+END_SRC
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
       (use-package persistent-scratch
-	:ensure t
 	:init
 	(persistent-scratch-setup-default)
 	(persistent-scratch-autosave-mode 1))
     #+END_SRC
-**** treemacs
+**** COMMENT treemacs
+removing since I do not use it really
 to be installed and configured, the following is the configuration that is advised in treemacs git repository
      #+BEGIN_SRC emacs-lisp
        (use-package treemacs
-	 :ensure t
 	 :defer t
 	 :init
 	 (with-eval-after-load 'winum
@@ -347,16 +335,10 @@ to be installed and configured, the following is the configuration that is advis
 	       ("C-x t M-t" . treemacs-find-tag)))
        (require 'treemacs-icons)
        (use-package treemacs-projectile
-	 :after (treemacs projectile)
-	 :ensure t)
+	 :after (treemacs projectile))
 
        (use-package treemacs-icons-dired
-	 :hook (dired-mode . treemacs-icons-dired-enable-once)
-	 :ensure t)
-
-       (use-package treemacs-magit
-	 :after (treemacs magit)
-	 :ensure t)
+	 :hook (dired-mode . treemacs-icons-dired-enable-once))
 
        ;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
        ;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
@@ -371,7 +353,6 @@ the next directive enables opening a folder in the same buffer, without generati
 **** COMMENT helm-icons
      #+begin_src emacs-lisp
        (use-package helm-icons
-	 :ensure t
 	 :config
 	 (setf helm-icons-mode->icon nil)
 	 (setf helm-icons-provider 'all-the-icons)
@@ -380,8 +361,7 @@ the next directive enables opening a folder in the same buffer, without generati
 *** Programming helpers
 **** Magit
    #+BEGIN_SRC emacs-lisp
-     (use-package magit
-       :ensure t)
+     (use-package magit)
    #+END_SRC
 **** company-mode
  #+begin_src emacs-lisp
@@ -402,39 +382,104 @@ the next directive enables opening a folder in the same buffer, without generati
 	   (company-abbrev company-dabbrev))))
 
  (use-package company-box
-   :ensure t
    :after company
    :hook (company-mode . company-box-mode))
  #+end_src
+**** copilot
+#+begin_src emacs-lisp
+  (use-package copilot
+    :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+    :ensure t)
+  (add-hook 'prog-mode-hook 'copilot-mode)
+  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 
+  (use-package copilot-chat
+    :straight (:host github :repo "chep/copilot-chat.el" :files ("*.el"))
+    :after (request org markdown-mode))
+  (add-hook 'git-commit-setup-hook 'copilot-chat-insert-commit-message)
+#+end_src
 **** Languages
 ***** Generic
+****** COMMENT tree-sitter
+       #+begin_src emacs-lisp
+         (use-package treesit
+           :when (and (fboundp 'treesit-available-p)
+                      (treesit-available-p))
+           :config (setq treesit-font-lock-level 4)
+           :init
+           (setq treesit-language-source-alist
+                 '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+                   (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+                   (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+                   (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+                   (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
+                   (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+                   (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+                   (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+                   (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
+                   (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+                   (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+                   (make       . ("https://github.com/alemuller/tree-sitter-make"))
+                   (markdown   . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
+                   (org        . ("https://github.com/milisims/tree-sitter-org"))
+                   (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+                   (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+                   (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
+                   (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
+           (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(c-or-c++-mode   . c-or-c++-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(css-mode        . css-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(js-mode         . js-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(js-json-mode    . json-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(makefile-mode   . cmake-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
+           (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
+       #+end_src
 ****** lsp-mode
        #+BEGIN_SRC emacs-lisp
-		  (use-package lsp-mode
-		    :ensure t
-		    :commands (lsp lsp-deferred)
-		    :init
-		    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-		    :hook ((f90-mode . lsp-mode)
-			   (python-mode . lsp-mode)
-			   (c-mode . lsp)
-			   (c++-mode . lsp)
-			   (lsp-mode . lsp-enable-which-key-integration)))
-		  (use-package helm-lsp
-		    :ensure t
-		    :config
-		    (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-		  (use-package lsp-ui
-		    :ensure t
-		    :hook (lsp-mode . lsp-ui-mode)
-		    :custom
-		    (lsp-ui-doc-position 'bottom))
-		  (use-package lsp-treemacs
-		    ;; project wide overview
-		    :ensure t
-		    :commands lsp-treemacs-errors-list)
+         (use-package lsp-mode
+           :commands (lsp lsp-deferred)
+           :init
+           (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+           :hook ((f90-mode . lsp-mode)
+                  (python-mode . lsp-mode)
+                  (c-mode . lsp)
+                  (c++-mode . lsp)
+                  (lsp-mode . lsp-enable-which-key-integration))
+           :config
+           (progn
+             (lsp-register-client
+              (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+                               :major-modes '(c-mode c++-mode)
+                               :remote? t
+                               :server-id 'clangd-remote))))
+         (use-package helm-lsp
+           :config
+           (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+         (use-package lsp-ui
+           :hook (lsp-mode . lsp-ui-mode)
+           :custom
+           (lsp-ui-doc-position 'bottom))
+         ;; (use-package lsp-treemacs
+         ;;   ;; project wide overview
+         ;;   :commands lsp-treemacs-errors-list)
+         ;; (use-package lsp-sonarlint
+         ;;   :custom
+         ;;   ;; Allow sonarlint to download and unzip the official VSCode extension
+         ;;   ;; If nil, you'll have to do that yourself. See also `lsp-sonarlint-download'
+         ;;   ;; `lsp-sonarlint-download-url' and `lsp-sonarlint-download-dir'
+         ;;   (lsp-sonarlint-auto-download t)
+
+         ;;   ;; Choose which analyzers you want enabled. By default all are enabled
+         ;;   ;; See command `lsp-sonarlint-available-analyzers' for the full list.
+         ;;   (lsp-sonarlint-enabled-analyzers '("cfamily"))
+         ;;   (lsp-sonarlint-cfamily-compilation-commands-path "./build/"))
        #+END_SRC
+
 ****** dap-mode
 #+begin_src emacs-lisp
   (use-package dap-mode
@@ -470,7 +515,6 @@ the next directive enables opening a folder in the same buffer, without generati
 ****** yasnippet
        #+begin_src emacs-lisp
 	 (use-package yasnippet
-	   :ensure t
 	   :init (yas-global-mode 1)
 	   ;; :hook (prog-mode-hook . yas-minor-mode)
 	   :commands yas-reload-all)
@@ -488,7 +532,6 @@ the next directive enables opening a folder in the same buffer, without generati
        #+begin_src emacs-lisp
  ;; flycheck
  (use-package flycheck
-   :ensure t
    :init (global-flycheck-mode)
    :config
    (setq flycheck-display-errors-function
@@ -496,7 +539,6 @@ the next directive enables opening a folder in the same buffer, without generati
    (setq flycheck-indication-mode nil))
 
  (use-package flycheck-pos-tip
-   :ensure t
    :after flycheck
    :config
    (flycheck-pos-tip-mode))
@@ -504,7 +546,6 @@ the next directive enables opening a folder in the same buffer, without generati
 ***** Python
        #+BEGIN_SRC emacs-lisp
 	 (use-package lsp-pyright
-	   :ensure t
 	   :hook (python-mode . (lambda ()
 				  (require 'lsp-pyright)
 				  (lsp))))  ; or lsp-deferred
@@ -516,7 +557,6 @@ the next directive enables opening a folder in the same buffer, without generati
 ***** C
       #+begin_src emacs-lisp
 	      ;; (use-package ccls
-	      ;; 	:ensure t
 	      ;; 	:hook ((c-mode c++-mode objc-mode cuda-mode) .
 	      ;; 	       (lambda () (require 'ccls) (lsp)))
 	      ;; 	:config
@@ -550,7 +590,7 @@ the next directive enables opening a folder in the same buffer, without generati
        (setq inferior-lisp-program "/usr/local/bin/sbcl")
 
        (eval-and-compile (require 'slime-autoloads))
-       (setq slime-contribs '(slime-fancy slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
+       (setq slime-contribs '(slime-banner slime-indentation slime-mdot-fu slime-fuzzy))
        (use-package slime-company
          :after (slime company)
          :config (setq slime-company-completion 'fuzzy
@@ -561,7 +601,6 @@ the next directive enables opening a folder in the same buffer, without generati
 helps identifying matching parentesis easily. In LISP it is really important
   #+BEGIN_SRC emacs-lisp
   (use-package rainbow-delimiters
-  :ensure t
   :init
   (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
   #+END_SRC
@@ -573,7 +612,6 @@ does the same as Autopais, but is already included in emacs
 **** company-mode
 #+begin_src emacs-lisp
   (use-package company
-    :ensure t
     :init
     (add-hook 'after-init-hook 'global-company-mode)
     :config
@@ -583,29 +621,33 @@ does the same as Autopais, but is already included in emacs
     :bind (:map company-active-map
 	   ("<tab>" . company-complete-selection)))
   (use-package slime-company
-  :ensure t
   :config
   (slime-setup '(slime-company)))
 #+end_src
 **** hl-todo
 #+begin_src emacs-lisp
   (use-package hl-todo
-    :ensure t
     :init
     (global-hl-todo-mode t))
+  (keymap-set hl-todo-mode-map "C-c t p" #'hl-todo-previous)
+  (keymap-set hl-todo-mode-map "C-c t n" #'hl-todo-next)
+  (keymap-set hl-todo-mode-map "C-c t o" #'hl-todo-occur)
+  (keymap-set hl-todo-mode-map "C-c t i" #'hl-todo-insert)
+
+  (setq hl-todo-color-background t)
   (setq hl-todo-keyword-faces
-	'(("TODO"   . "#ffa500")
-	  ("FIXME"  . "#e20800")
-	  ("OPTIMIZE" . "#fce94f")
-	  ("DOCME" . "#96ff00")
-	  ("NOTE"   . "#fce94f")
-	  ("HACK"   . "#e20800")
-	  ("TEMP"   . "#e20800")))
+        '(("TODO"   . "#00d8ff")
+          ("FIXME"  . "#96ff00")
+          ("OPTIMIZE" . "#fce94f")
+          ("DOCME" . "#96ff00")
+          ("NOTE"   . "#ff44cc")
+          ("HACK"   . "#e20800")
+          ("TEMP"   . "#e20800")))
 #+end_src
+
 **** multiple-cursors
      #+BEGIN_SRC emacs-lisp
        (use-package multiple-cursors
-	 :ensure t
 	 :bind (("C-S-c C-S-c" . 'mc/edit-lines)
 		("C->" . 'mc/mark-next-like-this)
 		("C-<" . 'mc/mark-previous-like-this)
@@ -614,7 +656,6 @@ does the same as Autopais, but is already included in emacs
 **** projectile
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :ensure t
     :config (projectile-mode)
     :custom ((projectile-completion-system 'helm))
     :bind-keymap
@@ -629,14 +670,14 @@ does the same as Autopais, but is already included in emacs
     (setq projectile-project-test-dir "build")
     (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter))
        #+END_SRC
+
 **** gendoxy
 #+begin_src emacs-lisp
   (load (expand-file-name "~/.emacs.d/gendoxy.el"))
 #+end_src
-**** ellama
+**** COMMENT ellama
 #+begin_src emacs-lisp
   (use-package ellama
-    :ensure t
     :bind-keymap
     ("C-x e" . ellama-keymap-prefix)
     :init
@@ -687,8 +728,7 @@ does the same as Autopais, but is already included in emacs
                                            ("training" . ?t)
                                            ("configuration" . ?f)))
           (setq org-babel-python-command "/usr/bin/python3")
-          (use-package helm-org
-            :ensure t)
+          (use-package helm-org)
           (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
           (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
 
@@ -716,12 +756,12 @@ does the same as Autopais, but is already included in emacs
      (setq org-startup-folded t)
      (setq org-startup-with-inline-images t)
    #+END_SRC
-**** org-present
+
+**** COMMENT org-present
 This configuration is based in a presentation by Daviwil in this [[https://www.youtube.com/watch?v=SCPoF1PTZpI][video]]
 ***** TODO needs to be properlly worked out to my needs
 #+begin_src emacs-lisp
-  (use-package org-present
-    :ensure t)
+  (use-package org-present)
 
   (defun my/org-present-prepare-slide (buffer-name heading)
     ;; Show only top-level headlines
@@ -777,8 +817,7 @@ This configuration is based in a presentation by Daviwil in this [[https://www.y
 #+end_src
 **** denote
 #+begin_src emacs-lisp
-  (use-package denote
-    :ensure t)
+  (use-package denote)
   (setq denote-directory (expand-file-name "~/Dropbox/orgfiles/denotes/"))
   (setq denote-known-keywords '("emacs" "programming" "journal"))
   (setq denote-date-prompt-use-org-read-date t)
@@ -797,7 +836,6 @@ This configuration is based in a presentation by Daviwil in this [[https://www.y
 mainly eye candy but at least I don't need to see so many * and so org mode is more condensed
    #+BEGIN_SRC emacs-lisp
    (use-package org-superstar
-      :ensure t
       :hook (org-mode . (lambda () (org-superstar-mode 1))))
    #+END_SRC
 
@@ -853,7 +891,6 @@ mainly eye candy but at least I don't need to see so many * and so org mode is m
 search several places from emacs
    #+BEGIN_SRC emacs-lisp
    (use-package engine-mode
-      :ensure t
       :config
       (engine-mode t))
     ;; to change the default browser from firefox to eww uncomment the following line
@@ -865,33 +902,28 @@ search several places from emacs
 a mode to hide all distraction from emacs and keep focused in the current document and work
    #+BEGIN_SRC emacs-lisp
      (use-package writeroom-mode
-       :ensure t
        :bind(([f5] . 'writeroom-mode)))
    #+END_SRC
-**** command log
+**** COMMENT command log
 Package useful for making emacs demonstrations
      #+BEGIN_SRC emacs-lisp
-       (use-package command-log-mode
-	 :ensure t)
+       (use-package command-log-mode)
      #+END_SRC
 
 **** terminal emulator (vterm)
      #+begin_src emacs-lisp
-       (use-package vterm
-           :ensure t)
+       (use-package vterm)
      #+end_src
 **** reddigg (reddit reader)
      #+begin_src emacs-lisp
        (use-package reddigg
-	 :ensure t
 	 :config
 	 (setq org-confirm-elisp-link-function nil
-	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt)))
+	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt brompton)))
      #+end_src
 **** pdf-tools
      #+begin_src emacs-lisp
        (use-package pdf-tools
-	 :ensure t
 	 :config (pdf-loader-install)
 	 :hook (pdf-view-mode . (lambda ()
 				  (pdf-tools-enable-minor-modes))))
@@ -900,13 +932,11 @@ Package useful for making emacs demonstrations
 **** rainbow-mode
 this is a mode to show colors in hex codes
 #+begin_src emacs-lisp
-  (use-package rainbow-mode
-    :ensure t)
+  (use-package rainbow-mode)
 #+end_src
 **** emmet (matrix client)
 #+begin_src emacs-lisp
-  (use-package ement
-    :ensure t)
+  (use-package ement)
 #+end_src
 ** Functions
 *** mygrep
@@ -973,7 +1003,7 @@ this is a mode to show colors in hex codes
 	   (all_journals (sort (directory-files "~/Dropbox/orgfiles/denotes" nil "^[0-9].*_journal.*org$") #'string>)))
       (dolist (journal all_journals)
 	(when (string< (substring journal 0 8) today)
-	  (return journal)))))
+	  (cl-return journal)))))
 
   (defun my-refile-tasks (file)
     (interactive)
