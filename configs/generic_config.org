@@ -65,7 +65,7 @@
 *** start from scratch
     #+BEGIN_SRC emacs-lisp
     (setq inhibit-startup-message t
-	inhibit-startup-echo-area-message t)
+        inhibit-startup-echo-area-message t)
     #+END_SRC
 *** ido mode, helps with searching
     it is disable currently due to the use of helm
@@ -134,28 +134,34 @@
 *** prettify symbols
      #+BEGIN_SRC emacs-lisp
        (defun my-add-pretty-list ()
-	 "make some word or string show as pretty unicode symbols"
-	 (mapc (lambda (pair) (push pair prettify-symbols-alist))
-	       '(
-		 ("lambda" . 955)
-		 ("->" . 8594)
-		 ("=>" . 8658)
-		 ("<=" . 8804)
-		 (">=" . 8805)
-		 ("sqrt" . 8730)
-		 ("alpha" . 945)
-		 ("beta" . 946)
-		 ("delta" . 916)
-		 ("omega" . 937)
-		 ("phi" . 969)
-		 ("pi" . 960)
-		 ("psi" . 936)
-		 ("theta" . 952)
-		 ("sum" . 8721))))
+         "make some word or string show as pretty unicode symbols"
+         (mapc (lambda (pair) (push pair prettify-symbols-alist))
+               '(
+                 ("lambda" . 955)
+                 ("->" . 8594)
+                 ("=>" . 8658)
+                 ("<=" . 8804)
+                 (">=" . 8805)
+                 ("sqrt" . 8730)
+                 ("alpha" . 945)
+                 ("beta" . 946)
+                 ("delta" . 916)
+                 ("omega" . 937)
+                 ("phi" . 969)
+                 ("pi" . 960)
+                 ("psi" . 936)
+                 ("theta" . 952)
+                 ("sum" . 8721))))
        (add-hook 'prog-mode-hook 'my-add-pretty-list)
        (add-hook 'org-mode-hook 'my-add-pretty-list)
        (global-prettify-symbols-mode +1)
      #+END_SRC
+
+*** Avy navigation
+#+begin_src emacs-lisp
+  (use-package avy
+    :bind* (("C-j" . avy-goto-char-timer)))
+#+end_src
 
 ** Packages
  #   #*** Melpa and use-Package
@@ -253,92 +259,92 @@ in windows it is needed to go to the folder where the fonts are downloaded, open
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
       (use-package persistent-scratch
-	:init
-	(persistent-scratch-setup-default)
-	(persistent-scratch-autosave-mode 1))
+        :init
+        (persistent-scratch-setup-default)
+        (persistent-scratch-autosave-mode 1))
     #+END_SRC
 **** COMMENT treemacs
 removing since I do not use it really
 to be installed and configured, the following is the configuration that is advised in treemacs git repository
      #+BEGIN_SRC emacs-lisp
        (use-package treemacs
-	 :defer t
-	 :init
-	 (with-eval-after-load 'winum
-	   (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-	 :config
-	 (progn
-	   (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-		 treemacs-deferred-git-apply-delay      0.5
-		 treemacs-directory-name-transformer    #'identity
-		 treemacs-display-in-side-window        t
-		 treemacs-eldoc-display                 t
-		 treemacs-file-event-delay              5000
-		 treemacs-file-extension-regex          treemacs-last-period-regex-value
-		 treemacs-file-follow-delay             0.2
-		 treemacs-file-name-transformer         #'identity
-		 treemacs-follow-after-init             t
-		 treemacs-expand-after-init             t
-		 treemacs-git-command-pipe              ""
-		 treemacs-goto-tag-strategy             'refetch-index
-		 treemacs-indentation                   2
-		 treemacs-indentation-string            " "
-		 treemacs-is-never-other-window         nil
-		 treemacs-max-git-entries               5000
-		 treemacs-missing-project-action        'ask
-		 treemacs-move-forward-on-expand        nil
-		 treemacs-no-png-images                 nil
-		 treemacs-no-delete-other-windows       t
-		 treemacs-project-follow-cleanup        nil
-		 treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-		 treemacs-position                      'left
-		 treemacs-read-string-input             'from-child-frame
-		 treemacs-recenter-distance             0.1
-		 treemacs-recenter-after-file-follow    nil
-		 treemacs-recenter-after-tag-follow     nil
-		 treemacs-recenter-after-project-jump   'always
-		 treemacs-recenter-after-project-expand 'on-distance
-		 treemacs-litter-directories            '("/node_modules" "/.venv" "/.cask")
-		 treemacs-show-cursor                   nil
-		 treemacs-show-hidden-files             t
-		 treemacs-silent-filewatch              nil
-		 treemacs-silent-refresh                nil
-		 treemacs-sorting                       'alphabetic-asc
-		 treemacs-space-between-root-nodes      t
-		 treemacs-tag-follow-cleanup            t
-		 treemacs-tag-follow-delay              1.5
-		 treemacs-user-mode-line-format         nil
-		 treemacs-user-header-line-format       nil
-		 treemacs-width                         35
-		 treemacs-workspace-switch-cleanup      nil)
+         :defer t
+         :init
+         (with-eval-after-load 'winum
+           (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+         :config
+         (progn
+           (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+                 treemacs-deferred-git-apply-delay      0.5
+                 treemacs-directory-name-transformer    #'identity
+                 treemacs-display-in-side-window        t
+                 treemacs-eldoc-display                 t
+                 treemacs-file-event-delay              5000
+                 treemacs-file-extension-regex          treemacs-last-period-regex-value
+                 treemacs-file-follow-delay             0.2
+                 treemacs-file-name-transformer         #'identity
+                 treemacs-follow-after-init             t
+                 treemacs-expand-after-init             t
+                 treemacs-git-command-pipe              ""
+                 treemacs-goto-tag-strategy             'refetch-index
+                 treemacs-indentation                   2
+                 treemacs-indentation-string            " "
+                 treemacs-is-never-other-window         nil
+                 treemacs-max-git-entries               5000
+                 treemacs-missing-project-action        'ask
+                 treemacs-move-forward-on-expand        nil
+                 treemacs-no-png-images                 nil
+                 treemacs-no-delete-other-windows       t
+                 treemacs-project-follow-cleanup        nil
+                 treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+                 treemacs-position                      'left
+                 treemacs-read-string-input             'from-child-frame
+                 treemacs-recenter-distance             0.1
+                 treemacs-recenter-after-file-follow    nil
+                 treemacs-recenter-after-tag-follow     nil
+                 treemacs-recenter-after-project-jump   'always
+                 treemacs-recenter-after-project-expand 'on-distance
+                 treemacs-litter-directories            '("/node_modules" "/.venv" "/.cask")
+                 treemacs-show-cursor                   nil
+                 treemacs-show-hidden-files             t
+                 treemacs-silent-filewatch              nil
+                 treemacs-silent-refresh                nil
+                 treemacs-sorting                       'alphabetic-asc
+                 treemacs-space-between-root-nodes      t
+                 treemacs-tag-follow-cleanup            t
+                 treemacs-tag-follow-delay              1.5
+                 treemacs-user-mode-line-format         nil
+                 treemacs-user-header-line-format       nil
+                 treemacs-width                         35
+                 treemacs-workspace-switch-cleanup      nil)
 
-	   ;; The default width and height of the icons is 22 pixels. If you are
-	   ;; using a Hi-DPI display, uncomment this to double the icon size.
-	   ;;(treemacs-resize-icons 44)
+           ;; The default width and height of the icons is 22 pixels. If you are
+           ;; using a Hi-DPI display, uncomment this to double the icon size.
+           ;;(treemacs-resize-icons 44)
 
-	   (treemacs-follow-mode t)
-	   (treemacs-filewatch-mode t)
-	   (treemacs-fringe-indicator-mode 'always)
-	   (pcase (cons (not (null (executable-find "git")))
-			(not (null treemacs-python-executable)))
-	     (`(t . t)
-	      (treemacs-git-mode 'deferred))
-	     (`(t . _)
-	      (treemacs-git-mode 'simple))))
-	 :bind
-	 (:map global-map
-	       ("M-0"       . treemacs-select-window)
-	       ("C-x t 1"   . treemacs-delete-other-windows)
-	       ("C-x t t"   . treemacs)
-	       ("C-x t B"   . treemacs-bookmark)
-	       ("C-x t C-t" . treemacs-find-file)
-	       ("C-x t M-t" . treemacs-find-tag)))
+           (treemacs-follow-mode t)
+           (treemacs-filewatch-mode t)
+           (treemacs-fringe-indicator-mode 'always)
+           (pcase (cons (not (null (executable-find "git")))
+                        (not (null treemacs-python-executable)))
+             (`(t . t)
+              (treemacs-git-mode 'deferred))
+             (`(t . _)
+              (treemacs-git-mode 'simple))))
+         :bind
+         (:map global-map
+               ("M-0"       . treemacs-select-window)
+               ("C-x t 1"   . treemacs-delete-other-windows)
+               ("C-x t t"   . treemacs)
+               ("C-x t B"   . treemacs-bookmark)
+               ("C-x t C-t" . treemacs-find-file)
+               ("C-x t M-t" . treemacs-find-tag)))
        (require 'treemacs-icons)
        (use-package treemacs-projectile
-	 :after (treemacs projectile))
+         :after (treemacs projectile))
 
        (use-package treemacs-icons-dired
-	 :hook (dired-mode . treemacs-icons-dired-enable-once))
+         :hook (dired-mode . treemacs-icons-dired-enable-once))
 
        ;; (use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
        ;;   :after (treemacs persp-mode) ;;or perspective vs. persp-mode
@@ -353,10 +359,10 @@ the next directive enables opening a folder in the same buffer, without generati
 **** COMMENT helm-icons
      #+begin_src emacs-lisp
        (use-package helm-icons
-	 :config
-	 (setf helm-icons-mode->icon nil)
-	 (setf helm-icons-provider 'all-the-icons)
-	 (helm-icons-enable))			;
+         :config
+         (setf helm-icons-mode->icon nil)
+         (setf helm-icons-provider 'all-the-icons)
+         (helm-icons-enable))
      #+end_src
 *** Programming helpers
 **** Magit
@@ -369,17 +375,17 @@ the next directive enables opening a folder in the same buffer, without generati
        :after lsp-mode
        :hook (lsp-mode . company-mode)
        :bind (:map lsp-mode-map
-	      ("<tab>" . company-indent-or-complete-common))
+              ("<tab>" . company-indent-or-complete-common))
        :config
    (setq company-show-numbers            t
-	 company-minimum-prefix-length   1
-	 company-idle-delay              0.5
-	 company-backends
-	 '((company-files          ; files & directory
-	    company-keywords       ; keywords
-	    company-capf           ; what is this?
-	    company-yasnippet)
-	   (company-abbrev company-dabbrev))))
+         company-minimum-prefix-length   1
+         company-idle-delay              0.5
+         company-backends
+         '((company-files          ; files & directory
+            company-keywords       ; keywords
+            company-capf           ; what is this?
+            company-yasnippet)
+           (company-abbrev company-dabbrev))))
 
  (use-package company-box
    :after company
@@ -441,43 +447,45 @@ the next directive enables opening a folder in the same buffer, without generati
        #+end_src
 ****** lsp-mode
        #+BEGIN_SRC emacs-lisp
-         (use-package lsp-mode
-           :commands (lsp lsp-deferred)
-           :init
-           (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-           :hook ((f90-mode . lsp-mode)
-                  (python-mode . lsp-mode)
-                  (c-mode . lsp)
-                  (c++-mode . lsp)
-                  (lsp-mode . lsp-enable-which-key-integration))
-           :config
-           (progn
-             (lsp-register-client
-              (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
-                               :major-modes '(c-mode c++-mode)
-                               :remote? t
-                               :server-id 'clangd-remote))))
-         (use-package helm-lsp
-           :config
-           (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-         (use-package lsp-ui
-           :hook (lsp-mode . lsp-ui-mode)
-           :custom
-           (lsp-ui-doc-position 'bottom))
-         ;; (use-package lsp-treemacs
-         ;;   ;; project wide overview
-         ;;   :commands lsp-treemacs-errors-list)
-         ;; (use-package lsp-sonarlint
-         ;;   :custom
-         ;;   ;; Allow sonarlint to download and unzip the official VSCode extension
-         ;;   ;; If nil, you'll have to do that yourself. See also `lsp-sonarlint-download'
-         ;;   ;; `lsp-sonarlint-download-url' and `lsp-sonarlint-download-dir'
-         ;;   (lsp-sonarlint-auto-download t)
+                  (use-package lsp-mode
+                    :commands (lsp lsp-deferred)
+                    :init
+                    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+                    :hook ((prog-mode . lsp-deferred)
+                           (f90-mode . lsp-mode)
+                           (python-mode . lsp-mode)
+                           (c-mode . lsp)
+                           (c++-mode . lsp)
+                           (lsp-mode . lsp-enable-which-key-integration))
+                    :config
+                    (progn
+                      (lsp-register-client
+                       (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+                                        :major-modes '(c-mode c++-mode)
+                                        :remote? t
+                                        :server-id 'clangd-remote))))
+                  (setq gc-cons-threshold 100000000) ;; necessary due to communication
+                  (use-package helm-lsp
+                    :config
+                    (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+                  (use-package lsp-ui
+                    :hook (lsp-mode . lsp-ui-mode)
+                    :custom
+                    (lsp-ui-doc-position 'bottom))
+                  ;; (use-package lsp-treemacs
+                  ;;   ;; project wide overview
+                  ;;   :commands lsp-treemacs-errors-list)
+                  ;; (use-package lsp-sonarlint
+                  ;;   :custom
+                  ;;   ;; Allow sonarlint to download and unzip the official VSCode extension
+                  ;;   ;; If nil, you'll have to do that yourself. See also `lsp-sonarlint-download'
+                  ;;   ;; `lsp-sonarlint-download-url' and `lsp-sonarlint-download-dir'
+                  ;;   (lsp-sonarlint-auto-download t)
 
-         ;;   ;; Choose which analyzers you want enabled. By default all are enabled
-         ;;   ;; See command `lsp-sonarlint-available-analyzers' for the full list.
-         ;;   (lsp-sonarlint-enabled-analyzers '("cfamily"))
-         ;;   (lsp-sonarlint-cfamily-compilation-commands-path "./build/"))
+                  ;;   ;; Choose which analyzers you want enabled. By default all are enabled
+                  ;;   ;; See command `lsp-sonarlint-available-analyzers' for the full list.
+                  ;;   (lsp-sonarlint-enabled-analyzers '("cfamily"))
+                  ;;   (lsp-sonarlint-cfamily-compilation-commands-path "./build/"))
        #+END_SRC
 
 ****** dap-mode
@@ -495,17 +503,17 @@ the next directive enables opening a folder in the same buffer, without generati
   (dap-register-debug-template
   "cpptools::Run Configuration"
   (list :type "cppdbg"
-	:request "launch"
-	:name "cpptools::Run Configuration"
-	:MIMode "gdb"
-	:program "${workspaceFolder}/ replace with your binary"
-	:cwd "${workspaceFolder}"))
+        :request "launch"
+        :name "cpptools::Run Configuration"
+        :MIMode "gdb"
+        :program "${workspaceFolder}/ replace with your binary"
+        :cwd "${workspaceFolder}"))
 
   ;; (defun dap-debug-create-or-edit-json-template ()
   ;;   "Edit the C++ debugging configuration or create + edit if none exists yet."
   ;;   (interactive)
   ;;   (let ((filename (concat (lsp-workspace-root) "/launch.json"))
-  ;; 	(default "~/.emacs.d/default-launch.json"))
+  ;;    (default "~/.emacs.d/default-launch.json"))
   ;;     (unless (file-exists-p filename)
   ;;       (copy-file default filename))
   ;;     (find-file-existing filename)))
@@ -514,10 +522,10 @@ the next directive enables opening a folder in the same buffer, without generati
 #+end_src
 ****** yasnippet
        #+begin_src emacs-lisp
-	 (use-package yasnippet
-	   :init (yas-global-mode 1)
-	   ;; :hook (prog-mode-hook . yas-minor-mode)
-	   :commands yas-reload-all)
+         (use-package yasnippet
+           :init (yas-global-mode 1)
+           ;; :hook (prog-mode-hook . yas-minor-mode)
+           :commands yas-reload-all)
  ;; This illustrates how to redefine yas-expand to S-TAB.
  (define-key yas-minor-mode-map [backtab]     'yas-expand)
 
@@ -535,7 +543,7 @@ the next directive enables opening a folder in the same buffer, without generati
    :init (global-flycheck-mode)
    :config
    (setq flycheck-display-errors-function
-	 #'flycheck-display-error-messages-unless-error-list)
+         #'flycheck-display-error-messages-unless-error-list)
    (setq flycheck-indication-mode nil))
 
  (use-package flycheck-pos-tip
@@ -545,38 +553,38 @@ the next directive enables opening a folder in the same buffer, without generati
        #+end_src
 ***** Python
        #+BEGIN_SRC emacs-lisp
-	 (use-package lsp-pyright
-	   :hook (python-mode . (lambda ()
-				  (require 'lsp-pyright)
-				  (lsp))))  ; or lsp-deferred
+         (use-package lsp-pyright
+           :hook (python-mode . (lambda ()
+                                  (require 'lsp-pyright)
+                                  (lsp))))  ; or lsp-deferred
        #+END_SRC
 ***** Fortran
        #+BEGIN_SRC emacs-lisp
-	 (add-hook 'f90-mode-hook 'lsp)
+         (add-hook 'f90-mode-hook 'lsp)
        #+END_SRC
 ***** C
       #+begin_src emacs-lisp
-	      ;; (use-package ccls
-	      ;; 	:hook ((c-mode c++-mode objc-mode cuda-mode) .
-	      ;; 	       (lambda () (require 'ccls) (lsp)))
-	      ;; 	:config
-	      ;; 	(setq ccls-executable "/usr/bin/ccls")
-	      ;; 	(setq ccls-initialization-options
-	;; 	      '(:index (:comments 2) :completion (:detailedLabel t))))
+              ;; (use-package ccls
+              ;;        :hook ((c-mode c++-mode objc-mode cuda-mode) .
+              ;;               (lambda () (require 'ccls) (lsp)))
+              ;;        :config
+              ;;        (setq ccls-executable "/usr/bin/ccls")
+              ;;        (setq ccls-initialization-options
+        ;;            '(:index (:comments 2) :completion (:detailedLabel t))))
 
-	;; Indentation
-	      ;; (setq c-default-style "linux"
-	      ;; 	    c-basic-offset 4
-	      ;; 	    c-label-offset 0
-	      ;; 	    tab-width 4
-	      ;; 	    indent-tabs-mode nil)
+        ;; Indentation
+              ;; (setq c-default-style "linux"
+              ;;            c-basic-offset 4
+              ;;            c-label-offset 0
+              ;;            tab-width 4
+              ;;            indent-tabs-mode nil)
 
-	;; (load (expand-file-name "~/.emacs.d/google-c-style.el"))
-	;; (require 'google-c-style)
-	;; (add-hook 'c-mode-common-hook 'google-set-c-style)
-	;; (add-hook 'c-mode-common-hook 'google-make-newline-indent)
+        ;; (load (expand-file-name "~/.emacs.d/google-c-style.el"))
+        ;; (require 'google-c-style)
+        ;; (add-hook 'c-mode-common-hook 'google-set-c-style)
+        ;; (add-hook 'c-mode-common-hook 'google-make-newline-indent)
 
-	      ;; (add-hook 'c-mode-hook 'lsp)
+              ;; (add-hook 'c-mode-hook 'lsp)
       #+end_src
 ***** Lisp
 ****** slime
@@ -616,10 +624,10 @@ does the same as Autopais, but is already included in emacs
     (add-hook 'after-init-hook 'global-company-mode)
     :config
     (setq company-idle-delay 0
-	  company-minimum-prefix-length 2
-	  company-selection-wrap-around t)
+          company-minimum-prefix-length 2
+          company-selection-wrap-around t)
     :bind (:map company-active-map
-	   ("<tab>" . company-complete-selection)))
+           ("<tab>" . company-complete-selection)))
   (use-package slime-company
   :config
   (slime-setup '(slime-company)))
@@ -648,10 +656,10 @@ does the same as Autopais, but is already included in emacs
 **** multiple-cursors
      #+BEGIN_SRC emacs-lisp
        (use-package multiple-cursors
-	 :bind (("C-S-c C-S-c" . 'mc/edit-lines)
-		("C->" . 'mc/mark-next-like-this)
-		("C-<" . 'mc/mark-previous-like-this)
-		("C-c C-<" . 'mc/mark-all-like-this)))
+         :bind (("C-S-c C-S-c" . 'mc/edit-lines)
+                ("C->" . 'mc/mark-next-like-this)
+                ("C-<" . 'mc/mark-previous-like-this)
+                ("C-c C-<" . 'mc/mark-all-like-this)))
      #+END_SRC
 **** projectile
 #+BEGIN_SRC emacs-lisp
@@ -694,45 +702,46 @@ does the same as Autopais, but is already included in emacs
 #+end_src
 *** org mode configuration
    #+BEGIN_SRC emacs-lisp
-          (use-package org
-            :init
-            (setq org-startup-folded 'content
-                  org-log-done t)
-            :bind (("\C-cl" . 'org-store-link)
-                   ("\C-ca" . 'org-agenda))
-            :config (setq org-support-shift-select t))
-          (setq org-directory "~/Dropbox/orgfiles")
-          (setf org-agenda-tags-column -100)
-          (setq org-todo-keywords
-             '((sequence "TODO(t)"
-                         "MAYBE"
-                         "NEXT"
-                         "STARTED"
-                         "WAITING"
-                         "DELEGATED"
-                         "|"
-                         "DONE(d)"
-                         "CANCELLED(c)")
-               (sequence
-                    "MEETING(m)"
-                    "|"
-                    "DONE(d)"
-                    "CANCELLED(c)")))
-          (setf org-group-tags nil)
-          (setf org-tag-persistent-alist '(("personal" . ?p)
-                                           ("houses" . ?h)
-                                           ("vacations" . ?v)
-                                           ("management" . ?m)
-                                           ("csw" . ?w)
-                                           ("coding" . ?c)
-                                           ("training" . ?t)
-                                           ("configuration" . ?f)))
-          (setq org-babel-python-command "/usr/bin/python3")
-          (use-package helm-org)
-          (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
-          (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
+     (use-package org
+       :init
+       (setq org-startup-folded 'content
+             org-log-done t)
+       :bind (("\C-cl" . 'org-store-link)
+              ("\C-ca" . 'org-agenda))
+       :config (setq org-support-shift-select t))
+     (setq org-directory "~/Dropbox/orgfiles")
+     (setf org-agenda-tags-column -100)
+     (setf org-agenda-include-diary t)
+     (setq org-todo-keywords
+           '((sequence "TODO(t)"
+                       "MAYBE"
+                       "NEXT"
+                       "STARTED"
+                       "WAITING"
+                       "DELEGATED"
+                       "|"
+                       "DONE(d)"
+                       "CANCELLED(c)")
+             (sequence
+              "MEETING(m)"
+              "|"
+              "DONE(d)"
+              "CANCELLED(c)")))
+     (setf org-group-tags nil)
+     (setf org-tag-persistent-alist '(("personal" . ?p)
+                                      ("houses" . ?h)
+                                      ("vacations" . ?v)
+                                      ("management" . ?m)
+                                      ("csw" . ?w)
+                                      ("coding" . ?c)
+                                      ("training" . ?t)
+                                      ("configuration" . ?f)))
+     (setq org-babel-python-command "/usr/bin/python3")
+     (use-package helm-org)
+     (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+     (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
 
-          ;; Resize Org headings
+     ;; Resize Org headings
      (dolist (face '((org-level-1 . 1.2)
                      (org-level-2 . 1.1)
                      (org-level-3 . 1.05)
@@ -755,7 +764,92 @@ does the same as Autopais, but is already included in emacs
      (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
      (setq org-startup-folded t)
      (setq org-startup-with-inline-images t)
+
+     (setq org-capture-templates
+           `(("n" "Note to Current File" entry
+              (file ,(lambda () (my-denote-current-file-path)))
+              "* NOTE %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:CAPTURED: %a\n:END:\n%?"
+              :prepend t)
+
+             ("j" "Journal Entry" entry
+              (file ,(lambda () (my-denote-current-file-path)))
+              "* %U %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i"
+              :prepend t)
+
+             ("t" "Task to Current File" entry
+              (file ,(lambda () (my-denote-current-file-path)))
+              "* TODO %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:SCHEDULE: %u\n:END:\n%?"
+              :prepend t)
+
+             ("m" "Meeting Notes" entry
+              (file ,(lambda () (my-denote-current-file-path)))
+              "* MEETING %? :meeting:\n  %U\n  \n** Attendees\n  - \n  \n** Agenda\n  - \n  \n** Notes\n  %i\n  \n** Action Items\n  - [ ] "
+              :prepend t)))
+
+     (defun my-denote-capture-note ()
+       "Quick capture a note to current file."
+       (interactive)
+       (org-capture nil "n"))
+
+     (defun my-denote-capture-task ()
+       "Quick capture a task to current file."
+       (interactive)
+       (org-capture nil "t"))
+
+     (defun my-denote-capture-journal ()
+       "Quick capture a journal entry to current file."
+       (interactive)
+       (org-capture nil "j"))
+
+     (defun my-denote-capture-meeting ()
+       "Quick capture meeting notes to current file."
+       (interactive)
+       (org-capture nil "m"))
+
+     ;; Keybindings
+     (global-set-key (kbd "C-c d c") #'my-denote-current-file)
+     (global-set-key (kbd "C-c d n") #'my-denote-capture-note)
+     (global-set-key (kbd "C-c d t") #'my-denote-capture-task)
+     (global-set-key (kbd "C-c d j") #'my-denote-capture-journal)
+     (global-set-key (kbd "C-c d m") #'my-denote-capture-meeting)
+     (global-set-key (kbd "C-c d a") #'my-denote-archive-done-items)
    #+END_SRC
+**** org-timed-alerts
+
+First I need to configure some dependencies
+#+begin_src emacs-lisp
+  (use-package alert
+    :straight (:host github :repo "jwiegley/alert")
+    :defer t)
+
+  (use-package org-ql
+    :straight (:host github :repo "alphapapa/org-ql")
+    :defer t)
+
+  (use-package ts.el
+    :straight (:host github :repo "alphapapa/ts.el")
+    :defer t)
+#+end_src
+
+Now the the configuration as in the main page, but using straight
+
+#+begin_src emacs-lisp
+  (use-package org-timed-alerts
+    :straight (:host github :repo "legalnonsense/org-timed-alerts")
+    :defer t
+    :after (org)
+    :config
+    (org-timed-alerts-alert-function #'alert)
+    (org-timed-alerts-tag-exclusions nil)
+    (org-timed-alerts-default-alert-props nil)
+    (org-timed-alerts-warning-times '(-10 -5))
+    (org-timed-alerts-agenda-hook-p t)
+    (org-timed-alert-final-alert-string "IT IS %alert-time\n\n%todo %headline")
+    (org-timed-alert-warning-string (concat "%todo %headline\n at %alert-time\n "
+                                            "it is now %current-time\n "
+                                            "*THIS IS YOUR %warning-time MINUTE WARNING*"))
+    (add-hook 'org-mode-hook #'org-timed-alerts-mode))
+#+end_src
 
 **** COMMENT org-present
 This configuration is based in a presentation by Daviwil in this [[https://www.youtube.com/watch?v=SCPoF1PTZpI][video]]
@@ -776,12 +870,12 @@ This configuration is based in a presentation by Daviwil in this [[https://www.y
   (defun my/org-present-start ()
     ;; Tweak font sizes
     (setq-local face-remapping-alist '((default (:height 1.5) variable-pitch)
-				       (header-line (:height 4.0) variable-pitch)
-				       (org-document-title (:height 1.75) org-document-title)
-				       (org-code (:height 1.55) org-code)
-				       (org-verbatim (:height 1.55) org-verbatim)
-				       (org-block (:height 1.25) org-block)
-				       (org-block-begin-line (:height 0.7) org-block)))
+                                       (header-line (:height 4.0) variable-pitch)
+                                       (org-document-title (:height 1.75) org-document-title)
+                                       (org-code (:height 1.55) org-code)
+                                       (org-verbatim (:height 1.55) org-verbatim)
+                                       (org-block (:height 1.25) org-block)
+                                       (org-block-begin-line (:height 0.7) org-block)))
 
     ;; Set a blank header line string to create blank space at the top
     (setq header-line-format " ")
@@ -842,32 +936,32 @@ mainly eye candy but at least I don't need to see so many * and so org mode is m
 **** calendar
 #+begin_src emacs-lisp
   (setq holiday-general-holidays nil
-	holiday-christian-holidays nil
-	holiday-hebrew-holidays nil
-	holiday-islamic-holidays nil
-	holiday-bahai-holidays nil
-	holiday-oriental-holidays nil
-	holiday-solar-holidays nil)
+        holiday-christian-holidays nil
+        holiday-hebrew-holidays nil
+        holiday-islamic-holidays nil
+        holiday-bahai-holidays nil
+        holiday-oriental-holidays nil
+        holiday-solar-holidays nil)
 
   (setq holiday-local-holidays '((holiday-fixed 1 1 "Dia ano novo")
-				 (holiday-fixed 2 14 "Valentine's Day")
-				 (holiday-easter-etc -47 "Carnaval")
-				 (holiday-easter-etc -2 "Sexta-feira santa")
-				 (holiday-easter-etc 0 "Páscoa")
-				 (holiday-easter-etc 60 "Corpo de Cristo")
-				 (holiday-fixed 3 19 "Dia do Pai")
-				 (holiday-fixed 4 25 "25 Abril")
-				 (holiday-fixed 5 1 "Dia trabalhador")
-				 (holiday-float 5 0 1 "Dia da Mãe")
-				 (holiday-fixed 6 1 "Dia da criança")
-				 (holiday-fixed 6 10 "Dia Portugal")
-				 (holiday-fixed 6 13 "Dia S António (Lisboa)")
-				 (holiday-fixed 8 15 "Dia S Assunção")
-				 (holiday-fixed 10 5 "Implantação da républica")
-				 (holiday-fixed 11 1 "Todos os santos")
-				 (holiday-fixed 12 1 "Restauração da Independência")
-				 (holiday-fixed 12 8 "Dia Imaculada conceição")
-				 (holiday-fixed 12 25 "Christmas")))
+                                 (holiday-fixed 2 14 "Valentine's Day")
+                                 (holiday-easter-etc -47 "Carnaval")
+                                 (holiday-easter-etc -2 "Sexta-feira santa")
+                                 (holiday-easter-etc 0 "Páscoa")
+                                 (holiday-easter-etc 60 "Corpo de Cristo")
+                                 (holiday-fixed 3 19 "Dia do Pai")
+                                 (holiday-fixed 4 25 "25 Abril")
+                                 (holiday-fixed 5 1 "Dia trabalhador")
+                                 (holiday-float 5 0 1 "Dia da Mãe")
+                                 (holiday-fixed 6 1 "Dia da criança")
+                                 (holiday-fixed 6 10 "Dia Portugal")
+                                 (holiday-fixed 6 13 "Dia S António (Lisboa)")
+                                 (holiday-fixed 8 15 "Dia S Assunção")
+                                 (holiday-fixed 10 5 "Implantação da républica")
+                                 (holiday-fixed 11 1 "Todos os santos")
+                                 (holiday-fixed 12 1 "Restauração da Independência")
+                                 (holiday-fixed 12 8 "Dia Imaculada conceição")
+                                 (holiday-fixed 12 25 "Christmas")))
 #+end_src
 
 *** rst mode configuration
@@ -917,16 +1011,32 @@ Package useful for making emacs demonstrations
 **** reddigg (reddit reader)
      #+begin_src emacs-lisp
        (use-package reddigg
-	 :config
-	 (setq org-confirm-elisp-link-function nil
-	       reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt brompton)))
+         :config
+         (setq org-confirm-elisp-link-function nil
+               reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt brompton)))
      #+end_src
+**** COMMENT empv (mpv/youtube/media player)
+#+begin_src emacs-lisp
+  (use-package empv
+    :straight (:host github :repo "isamert/empv.el")
+    :defer t
+    :autoload (empv--select-action)
+    :bind-keymap
+    ("C-c m" . empv-map)
+    :config
+    (setq empv-allow-insecure-connections t)
+    (setq empv-invidious-instance "https://inv.nadeko.net/")
+    (setq empv-youtube-use-tabulated-results t)
+    (add-to-list 'empv-mpv-args "--ytdl-format=bestvideo+bestaudio/best[ext=mp4]/best")
+    (add-to-list 'empv-mpv-args "--save-position-on-quit")
+    (setq empv-reset-playback-speed-on-quit t))
+#+end_src
 **** pdf-tools
      #+begin_src emacs-lisp
        (use-package pdf-tools
-	 :config (pdf-loader-install)
-	 :hook (pdf-view-mode . (lambda ()
-				  (pdf-tools-enable-minor-modes))))
+         :config (pdf-loader-install)
+         :hook (pdf-view-mode . (lambda ()
+                                  (pdf-tools-enable-minor-modes))))
 
      #+end_src
 **** rainbow-mode
@@ -946,124 +1056,260 @@ this is a mode to show colors in hex codes
       (interactive)
       (let* ((search-term (read-string "search term: "))
              (search-path
-	       (directory-file-name (expand-file-name (read-directory-name "directory: "))))
+               (directory-file-name (expand-file-name (read-directory-name "directory: "))))
              (default-directory (file-name-as-directory search-path))
              (grep-command
-	       (concat
-	         grep-program
-	         " -inIr '--include=*.'{lisp,cl,bil,el,asd,dic} -e \"^[^;]*"
-	         search-term
-		 "\" "
-		 search-path)))
+               (concat
+                 grep-program
+                 " -inIr '--include=*.'{lisp,cl,bil,el,asd,dic} -e \"^[^;]*"
+                 search-term
+                 "\" "
+                 search-path)))
             (compilation-start grep-command 'grep-mode (lambda (mode) "grep") nil)))
    #+END_SRC
 
 *** wheather
     #+begin_src emacs-lisp
       (defun weather ()
-	(interactive)
-	(let* ((wdiff (- 127 (window-total-width)))
-	       (site "wttr.in/")
-	       (location (read-string "where: " "" "" "lisboa")))
-	  (eww (concat site location))
-	  (when (> wdiff 0)
-	    (enlarge-window-horizontally wdiff))))
+        (interactive)
+        (let* ((wdiff (- 127 (window-total-width)))
+               (site "wttr.in/")
+               (location (read-string "where: " "" "" "lisboa")))
+          (eww (concat site location))
+          (when (> wdiff 0)
+            (enlarge-window-horizontally wdiff))))
     #+end_src
 
 *** denote
 #+begin_src emacs-lisp
-  (require 'cl)
+      (require 'cl)
 
-  (defun journals_to_org_agenda ()
-    "get journals since last month"
-    (let* ((min_date (format-time-string "%Y%m%d"
-					 (encode-time
-					  (decoded-time-add (parse-time-string
-							     (calendar-date-string
-							      (calendar-current-date)))
-							    (make-decoded-time :month (- 1))))))
-	   (all_journals (sort
-			  (directory-files denote-directory nil "^[0-9].*_journal.*org$")
-			  #'string>))
-	   (out_list nil))
-      (dolist (journal all_journals out_list)
-	(when (string> (substring journal 0 8) min_date)
-	  (push (concat denote-directory journal) out_list)))))
+      (defun journals_to_org_agenda ()
+        "get journals since last month"
+        (let* ((min_date (format-time-string "%Y%m%d"
+                                           (encode-time
+                                            (decoded-time-add (parse-time-string
+                                                               (calendar-date-string
+                                                                (calendar-current-date)))
+                                                              (make-decoded-time :month (- 1))))))
+               (all_journals (sort
+                            (directory-files denote-directory nil "^[0-9].*_journal.*org$")
+                            #'string>))
+               (out_list nil))
+          (dolist (journal all_journals out_list)
+            (when (string> (substring journal 0 8) min_date)
+              (push (concat denote-directory journal) out_list)))))
 
-  (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
-				 (journals_to_org_agenda)))
+      (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
+                                     (list (my-denote-current-file-path))
+                                   (journals_to_org_agenda)))
 
-  (defun journal-day-exists-p ( target )
-    "check if journal for a day already exists"
-    (file-expand-wildcards (concat denote-directory target "*_journal*.org")))
+      (defun journal-day-exists-p ( target )
+        "check if journal for a day already exists"
+        (file-expand-wildcards (concat denote-directory target "*_journal*.org")))
 
-  (defun find-previous-journal ()
-    "Find most recent journal"
-    (let* ((today (format-time-string "%Y%m%d"))
-	   (all_journals (sort (directory-files "~/Dropbox/orgfiles/denotes" nil "^[0-9].*_journal.*org$") #'string>)))
-      (dolist (journal all_journals)
-	(when (string< (substring journal 0 8) today)
-	  (cl-return journal)))))
+      (defun find-previous-journal ()
+        "Find most recent journal"
+        (let* ((today (format-time-string "%Y%m%d"))
+               (all_journals (sort (directory-files "~/Dropbox/orgfiles/denotes" nil "^[0-9].*_journal.*org$") #'string>)))
+          (dolist (journal all_journals)
+            (when (string< (substring journal 0 8) today)
+              (cl-return journal)))))
 
-  (defun my-refile-tasks (file)
+      (defun my-refile-tasks (file)
+        (interactive)
+        (let* ((org-archive-location (concat file "::* TASKS"))
+               (org-archive-save-context-info nil))
+
+          (goto-char (point-min))
+          (unless (re-search-forward "^\\* TASKS" nil t)
+            (goto-char (point-max))
+            (insert "* TASKS\n\n"))
+          (goto-char (point-max))
+          (while
+              (re-search-backward
+               "^\\*\\* \\(TODO\\|MAYBE\\|NEXT\\|STARTED\\|WAITING\\|DELEGATED\\|MEETING\\|SCHEDULED\\|DEADLINE\\)" nil t)
+            (org-archive-subtree))))
+
+      (defun move-todos()
+        (let ((filename (concat denote-directory
+                              (find-previous-journal))))
+          (find-file filename)
+          (my-refile-tasks (car
+                          (journal-day-exists-p
+                           (format-time-string "%Y%m%d"))))
+          (save-buffer)
+          (kill-buffer (buffer-name))))
+
+      (defun my-denote-journal-today ()
+        "Create an entry tagged 'journal' with the date as its title."
+        (interactive)
+        (let* ((today (format-time-string "%Y%m%d"))
+               (filename (car (journal-day-exists-p today)))
+               (prev (find-previous-journal)))
+          (if filename
+              (find-file filename)
+            (progn
+              (denote
+               (format-time-string "%Yw%W-%a %e %b")   ; format like 2022w48-Tue 29 Nov
+               '("journal")
+               nil
+               "~/Denotes")
+              (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n\n")
+              (save-buffer)
+              (move-todos)
+              (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
+                                           (journals_to_org_agenda)))))))
+
+      (defun my-denote-journal-date()
+      (declare (interactive-only t))
+      (interactive)
+      (let* ((date (org-read-date nil t))
+             (filename (car (journal-day-exists-p (format-time-string "%Y%m%d" date)))))
+        (if filename
+            (find-file filename)
+          (progn
+            (denote
+             (format-time-string "%Yw%W-%a %e %b" date)   ; format like Tuesday 14 June 2022
+             '("journal")
+             nil
+             "~/Denotes")
+            (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n - Remember to call:\n\n (move-todos)")))))
+
+    (defun my-denote-archive-done-items ()
+      "Archive all DONE headings from current file to yearly archive file."
+      (interactive)
+      (when (and buffer-file-name
+                 (string-match-p "__current\\.org$" buffer-file-name))
+        (let* ((current-file buffer-file-name)
+               (current-year (format-time-string "%Y"))
+               (identifier (denote-retrieve-filename-identifier current-file))
+               (archive-file (concat (file-name-directory current-file)
+                                    identifier "__" current-year ".org"))
+               (done-items '())
+               (archive-buffer nil))
+
+          ;; Collect all DONE items
+          (save-excursion
+            (goto-char (point-min))
+            (while (re-search-forward "^\\*+ DONE " nil t)
+              (let ((start (line-beginning-position))
+                    (end (save-excursion
+                           (outline-next-heading)
+                           (if (eobp) (point) (1- (point))))))
+                (push (list start end (buffer-substring-no-properties start end)) done-items))))
+
+          ;; If we have DONE items, process them
+          (when done-items
+            ;; Create archive file if it doesn't exist
+            (unless (file-exists-p archive-file)
+              (with-temp-file archive-file
+                (insert (denote--format-front-matter
+                         (concat "Archive " current-year)
+                         (current-time)
+                         '("archive")
+                         identifier
+                         ""
+                         'org))
+                (insert "\n")))
+
+            ;; Open archive file
+            (setq archive-buffer (find-file-noselect archive-file))
+
+            ;; Append DONE items to archive file
+            (with-current-buffer archive-buffer
+              (goto-char (point-max))
+              (unless (bolp) (insert "\n"))
+              (dolist (item (reverse done-items))
+                (insert (nth 2 item))
+                (unless (bolp) (insert "\n")))
+              (save-buffer))
+
+            ;; Remove DONE items from current file (in reverse order to maintain positions)
+            (dolist (item done-items)
+              (delete-region (nth 0 item) (nth 1 item)))
+
+            (message "Archived %d DONE items to %s"
+                     (length done-items)
+                     (file-name-nondirectory archive-file))))))
+
+    ;; Add to save hook for current files
+    (defun my-denote-maybe-archive-on-save ()
+      "Archive DONE items if saving a current.org file."
+      (when (and buffer-file-name
+                 (string-match-p "__current\\.org$" buffer-file-name))
+        (my-denote-archive-done-items)))
+
+    (add-hook 'after-save-hook #'my-denote-maybe-archive-on-save)
+
+    (defun my-denote-current-file ()
+      "Create or find the current denote file for ongoing notes."
+      (interactive)
+      (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
+             (current-file (car current-files)))
+
+        (if current-file
+            (find-file current-file)
+          ;; Create new current file
+          (let ((denote-prompts '())
+                (denote-use-title "Current Notes")
+                (denote-use-keywords '("current"))
+                (denote-use-signature "current"))
+            (call-interactively #'denote)))))
+
+    (defun my-denote-current-file-path ()
+    "Return the path to the current denote file, creating it if necessary."
+    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$")))
+      (if current-files
+          (car current-files)
+        ;; Create current file if it doesn't exist
+        (let ((denote-prompts '())
+              (denote-use-title "Current Notes")
+              (denote-use-signature "current"))
+          (save-window-excursion
+            (call-interactively #'denote)
+            (buffer-file-name))))))
+
+
+    (defun my-denote-open-current-year-archive ()
+    "Open the archive file for the current year."
     (interactive)
-    (let* ((org-archive-location (concat file "::* TASKS"))
-	   (org-archive-save-context-info nil))
+    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
+           (current-file (car current-files)))
 
-      (goto-char (point-min))
-      (unless (re-search-forward "^\\* TASKS" nil t)
-	(goto-char (point-max))
-	(insert "* TASKS\n\n"))
-      (goto-char (point-max))
-      (while
-	  (re-search-backward
-	   "^\\*\\* \\(TODO\\|MAYBE\\|NEXT\\|STARTED\\|WAITING\\|DELEGATED\\|MEETING\\|SCHEDULED\\|DEADLINE\\)" nil t)
-	(org-archive-subtree))))
+      (if current-file
+          (let* ((current-year (format-time-string "%Y"))
+                 (identifier (denote-retrieve-filename-identifier current-file))
+                 (archive-file (concat (file-name-directory current-file)
+                                      identifier "__" current-year ".org")))
+            (if (file-exists-p archive-file)
+                (find-file archive-file)
+              (message "Archive file for %s doesn't exist yet" current-year)))
+        (message "No current file found"))))
 
-  (defun move-todos()
-    (let ((filename (concat denote-directory
-			    (find-previous-journal))))
-      (find-file filename)
-      (my-refile-tasks (car
-			(journal-day-exists-p
-			 (format-time-string "%Y%m%d"))))
-      (save-buffer)
-      (kill-buffer (buffer-name))))
+  (global-set-key (kbd "C-c d A") #'my-denote-open-current-year-archive)
+#+end_src
 
-  (defun my-denote-journal-today ()
-    "Create an entry tagged 'journal' with the date as its title."
-    (interactive)
-    (let* ((today (format-time-string "%Y%m%d"))
-	   (filename (car (journal-day-exists-p today)))
-	   (prev (find-previous-journal)))
-      (if filename
-	  (find-file filename)
-	(progn
-	  (denote
-	   (format-time-string "%Yw%W-%a %e %b")   ; format like 2022w48-Tue 29 Nov
-	   '("journal")
-	   nil
-	   "~/Denotes")
-	  (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n\n")
-	  (save-buffer)
-	  (move-todos)
-	  (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
-					 (journals_to_org_agenda)))))))
-
-  (defun my-denote-journal-date()
-  (declare (interactive-only t))
-  (interactive)
-  (let* ((date (org-read-date nil t))
-	 (filename (car (journal-day-exists-p (format-time-string "%Y%m%d" date)))))
-    (if filename
-	(find-file filename)
-      (progn
-	(denote
-	 (format-time-string "%Yw%W-%a %e %b" date)   ; format like Tuesday 14 June 2022
-	 '("journal")
-	 nil
-	 "~/Denotes")
-	(insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n - Remember to call:\n\n (move-todos)")))))
+*** text input
+#+begin_src emacs-lisp
+  (defun my-create-header (text)
+    "Create a stylized header with TEXT centered in 80 characters."
+    (interactive "sHeader text: ")
+    (let* ((total-width 80)
+           (text-length (length text))
+           (padding-total (- total-width text-length 2)) ; 2 for spaces around text
+           (padding-each-side (/ padding-total 2))
+           (padding-left padding-each-side)
+           (padding-right (- padding-total padding-left))
+           (header-line (make-string total-width ?#))
+           (text-line (concat 
+                       (make-string padding-left ?#)
+                       " " text " "
+                       (make-string padding-right ?#))))
+      
+      (insert header-line "\n")
+      (insert text-line "\n")
+      (insert header-line "\n")))
 #+end_src
 
 * COMMENT Unused Configurations
@@ -1100,11 +1346,3 @@ automatically completes words in programming modes
    ;; (setq centaur-tabs-modified-marker "*")
 
  #+END_SRC
-
-
-
-
-
-
-
- 
