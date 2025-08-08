@@ -205,8 +205,6 @@ my current theme, it has some minor changes compared to the origial, mainly the 
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
      (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
-     ;; (add-to-list 'custom-theme-load-path "/home/torres/projects/external/moe-theme.el_original/")
-     ;; (add-to-list 'load-path "/home/torres/projects/external/moe-theme.el_original/")
      (require 'moe-theme)
      (require 'moe-theme-flavours)
      (moe-theme-flavour-darkmate)
