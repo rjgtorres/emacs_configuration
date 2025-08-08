@@ -163,6 +163,7 @@
     :bind* (("C-j" . avy-goto-char-timer)))
 #+end_src
 
+
 ** Packages
  #   #*** Melpa and use-Package
  #    Use-package is a handful of things: you can make sure a package is downloaded, efficiently configure it (e.g. after load, or as needed), bind keys in a concise way, and more.
@@ -204,6 +205,8 @@ my current theme, it has some minor changes compared to the origial, mainly the 
    #+BEGIN_SRC emacs-lisp
      (add-to-list 'custom-theme-load-path "~/.emacs.d/moe-theme.el/")
      (add-to-list 'load-path "~/.emacs.d/moe-theme.el/")
+     ;; (add-to-list 'custom-theme-load-path "/home/torres/projects/external/moe-theme.el_original/")
+     ;; (add-to-list 'load-path "/home/torres/projects/external/moe-theme.el_original/")
      (require 'moe-theme)
      (require 'moe-theme-flavours)
      (moe-theme-flavour-darkmate)
@@ -765,54 +768,6 @@ does the same as Autopais, but is already included in emacs
      (setq org-startup-folded t)
      (setq org-startup-with-inline-images t)
 
-     (setq org-capture-templates
-           `(("n" "Note to Current File" entry
-              (file ,(lambda () (my-denote-current-file-path)))
-              "* NOTE %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:CAPTURED: %a\n:END:\n%?"
-              :prepend t)
-
-             ("j" "Journal Entry" entry
-              (file ,(lambda () (my-denote-current-file-path)))
-              "* %U %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i"
-              :prepend t)
-
-             ("t" "Task to Current File" entry
-              (file ,(lambda () (my-denote-current-file-path)))
-              "* TODO %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:SCHEDULE: %u\n:END:\n%?"
-              :prepend t)
-
-             ("m" "Meeting Notes" entry
-              (file ,(lambda () (my-denote-current-file-path)))
-              "* MEETING %? :meeting:\n  %U\n  \n** Attendees\n  - \n  \n** Agenda\n  - \n  \n** Notes\n  %i\n  \n** Action Items\n  - [ ] "
-              :prepend t)))
-
-     (defun my-denote-capture-note ()
-       "Quick capture a note to current file."
-       (interactive)
-       (org-capture nil "n"))
-
-     (defun my-denote-capture-task ()
-       "Quick capture a task to current file."
-       (interactive)
-       (org-capture nil "t"))
-
-     (defun my-denote-capture-journal ()
-       "Quick capture a journal entry to current file."
-       (interactive)
-       (org-capture nil "j"))
-
-     (defun my-denote-capture-meeting ()
-       "Quick capture meeting notes to current file."
-       (interactive)
-       (org-capture nil "m"))
-
-     ;; Keybindings
-     (global-set-key (kbd "C-c d c") #'my-denote-current-file)
-     (global-set-key (kbd "C-c d n") #'my-denote-capture-note)
-     (global-set-key (kbd "C-c d t") #'my-denote-capture-task)
-     (global-set-key (kbd "C-c d j") #'my-denote-capture-journal)
-     (global-set-key (kbd "C-c d m") #'my-denote-capture-meeting)
-     (global-set-key (kbd "C-c d a") #'my-denote-archive-done-items)
    #+END_SRC
 **** org-timed-alerts
 
@@ -1048,8 +1003,35 @@ this is a mode to show colors in hex codes
 #+begin_src emacs-lisp
   (use-package ement)
 #+end_src
-** Functions
-*** mygrep
+**** elfeed
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :straight (:type git :host github :repo "skeeto/elfeed")
+    :defer t
+    :bind (("C-c f" . 'elfeed))
+    :hook (('elfeed-new-entry-hook . (elfeed-make-tagger :feed-url "youtube\\.com"
+                                                        :add '(video youtube)))
+           ('elfeed-new-entry-hook . (elfeed-make-tagger before "2 weeks ago"
+                                                        :remove 'unread)))
+    :config
+    (elfeed-update)
+    ;; the default filter elfeed uses
+    (setq-default elfeed-search-filter "@6-months-ago +unread")
+    (setq elfeed-curl-program-name "curl")
+    (setq elfeed-curl-timeout 200)
+    (setq url-queue-timeout 500))
+  (use-package elfeed-org
+    :straight (:type git :host github :repo "remyhonig/elfeed-org")
+    :defer t
+    :config
+    (elfeed-org)
+    (setq rmh-elfeed-org-files (list "~/.emacs.d/elfeed.org")))
+
+  (setq elfeed-db-directory "~/.config/emacs/elfeed")
+
+#+end_src
+* Personal Functions
+** mygrep
     #+BEGIN_SRC emacs-lisp
     (defun mygrep-lisp ()
       "Recursively grep from current file directory, ignoring comments."
@@ -1068,7 +1050,7 @@ this is a mode to show colors in hex codes
             (compilation-start grep-command 'grep-mode (lambda (mode) "grep") nil)))
    #+END_SRC
 
-*** wheather
+** wheather
     #+begin_src emacs-lisp
       (defun weather ()
         (interactive)
@@ -1080,184 +1062,27 @@ this is a mode to show colors in hex codes
             (enlarge-window-horizontally wdiff))))
     #+end_src
 
-*** denote
+** denote
 #+begin_src emacs-lisp
-      (require 'cl)
+  (require 'cl)
 
-      (defun journals_to_org_agenda ()
-        "get journals since last month"
-        (let* ((min_date (format-time-string "%Y%m%d"
-                                           (encode-time
-                                            (decoded-time-add (parse-time-string
-                                                               (calendar-date-string
-                                                                (calendar-current-date)))
-                                                              (make-decoded-time :month (- 1))))))
-               (all_journals (sort
-                            (directory-files denote-directory nil "^[0-9].*_journal.*org$")
-                            #'string>))
-               (out_list nil))
-          (dolist (journal all_journals out_list)
-            (when (string> (substring journal 0 8) min_date)
-              (push (concat denote-directory journal) out_list)))))
+  (defun journals_to_org_agenda ()
+    "get journals since last month"
+    (let* ((min_date (format-time-string "%Y%m%d"
+                                         (encode-time
+                                          (decoded-time-add (parse-time-string
+                                                             (calendar-date-string
+                                                              (calendar-current-date)))
+                                                            (make-decoded-time :month (- 1))))))
+           (all_journals (sort
+                          (directory-files denote-directory nil "^[0-9].*_journal.*org$")
+                          #'string>))
+           (out_list nil))
+      (dolist (journal all_journals out_list)
+        (when (string> (substring journal 0 8) min_date)
+          (push (concat denote-directory journal) out_list)))))
 
-      (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
-                                     (list (my-denote-current-file-path))
-                                   (journals_to_org_agenda)))
-
-      (defun journal-day-exists-p ( target )
-        "check if journal for a day already exists"
-        (file-expand-wildcards (concat denote-directory target "*_journal*.org")))
-
-      (defun find-previous-journal ()
-        "Find most recent journal"
-        (let* ((today (format-time-string "%Y%m%d"))
-               (all_journals (sort (directory-files "~/Dropbox/orgfiles/denotes" nil "^[0-9].*_journal.*org$") #'string>)))
-          (dolist (journal all_journals)
-            (when (string< (substring journal 0 8) today)
-              (cl-return journal)))))
-
-      (defun my-refile-tasks (file)
-        (interactive)
-        (let* ((org-archive-location (concat file "::* TASKS"))
-               (org-archive-save-context-info nil))
-
-          (goto-char (point-min))
-          (unless (re-search-forward "^\\* TASKS" nil t)
-            (goto-char (point-max))
-            (insert "* TASKS\n\n"))
-          (goto-char (point-max))
-          (while
-              (re-search-backward
-               "^\\*\\* \\(TODO\\|MAYBE\\|NEXT\\|STARTED\\|WAITING\\|DELEGATED\\|MEETING\\|SCHEDULED\\|DEADLINE\\)" nil t)
-            (org-archive-subtree))))
-
-      (defun move-todos()
-        (let ((filename (concat denote-directory
-                              (find-previous-journal))))
-          (find-file filename)
-          (my-refile-tasks (car
-                          (journal-day-exists-p
-                           (format-time-string "%Y%m%d"))))
-          (save-buffer)
-          (kill-buffer (buffer-name))))
-
-      (defun my-denote-journal-today ()
-        "Create an entry tagged 'journal' with the date as its title."
-        (interactive)
-        (let* ((today (format-time-string "%Y%m%d"))
-               (filename (car (journal-day-exists-p today)))
-               (prev (find-previous-journal)))
-          (if filename
-              (find-file filename)
-            (progn
-              (denote
-               (format-time-string "%Yw%W-%a %e %b")   ; format like 2022w48-Tue 29 Nov
-               '("journal")
-               nil
-               "~/Denotes")
-              (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n\n")
-              (save-buffer)
-              (move-todos)
-              (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
-                                           (journals_to_org_agenda)))))))
-
-      (defun my-denote-journal-date()
-      (declare (interactive-only t))
-      (interactive)
-      (let* ((date (org-read-date nil t))
-             (filename (car (journal-day-exists-p (format-time-string "%Y%m%d" date)))))
-        (if filename
-            (find-file filename)
-          (progn
-            (denote
-             (format-time-string "%Yw%W-%a %e %b" date)   ; format like Tuesday 14 June 2022
-             '("journal")
-             nil
-             "~/Denotes")
-            (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n - Remember to call:\n\n (move-todos)")))))
-
-    (defun my-denote-archive-done-items ()
-      "Archive all DONE headings from current file to yearly archive file."
-      (interactive)
-      (when (and buffer-file-name
-                 (string-match-p "__current\\.org$" buffer-file-name))
-        (let* ((current-file buffer-file-name)
-               (current-year (format-time-string "%Y"))
-               (identifier (denote-retrieve-filename-identifier current-file))
-               (archive-file (concat (file-name-directory current-file)
-                                    identifier "__" current-year ".org"))
-               (done-items '())
-               (archive-buffer nil))
-
-          ;; Collect all DONE items
-          (save-excursion
-            (goto-char (point-min))
-            (while (re-search-forward "^\\*+ DONE " nil t)
-              (let ((start (line-beginning-position))
-                    (end (save-excursion
-                           (outline-next-heading)
-                           (if (eobp) (point) (1- (point))))))
-                (push (list start end (buffer-substring-no-properties start end)) done-items))))
-
-          ;; If we have DONE items, process them
-          (when done-items
-            ;; Create archive file if it doesn't exist
-            (unless (file-exists-p archive-file)
-              (with-temp-file archive-file
-                (insert (denote--format-front-matter
-                         (concat "Archive " current-year)
-                         (current-time)
-                         '("archive")
-                         identifier
-                         ""
-                         'org))
-                (insert "\n")))
-
-            ;; Open archive file
-            (setq archive-buffer (find-file-noselect archive-file))
-
-            ;; Append DONE items to archive file
-            (with-current-buffer archive-buffer
-              (goto-char (point-max))
-              (unless (bolp) (insert "\n"))
-              (dolist (item (reverse done-items))
-                (insert (nth 2 item))
-                (unless (bolp) (insert "\n")))
-              (save-buffer))
-
-            ;; Remove DONE items from current file (in reverse order to maintain positions)
-            (dolist (item done-items)
-              (delete-region (nth 0 item) (nth 1 item)))
-
-            (message "Archived %d DONE items to %s"
-                     (length done-items)
-                     (file-name-nondirectory archive-file))))))
-
-    ;; Add to save hook for current files
-    (defun my-denote-maybe-archive-on-save ()
-      "Archive DONE items if saving a current.org file."
-      (when (and buffer-file-name
-                 (string-match-p "__current\\.org$" buffer-file-name))
-        (my-denote-archive-done-items)))
-
-    (add-hook 'after-save-hook #'my-denote-maybe-archive-on-save)
-
-    (defun my-denote-current-file ()
-      "Create or find the current denote file for ongoing notes."
-      (interactive)
-      (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
-             (current-file (car current-files)))
-
-        (if current-file
-            (find-file current-file)
-          ;; Create new current file
-          (let ((denote-prompts '())
-                (denote-use-title "Current Notes")
-                (denote-use-keywords '("current"))
-                (denote-use-signature "current"))
-            (call-interactively #'denote)))))
-
-    (defun my-denote-current-file-path ()
+  (defun my-denote-current-file-path ()
     "Return the path to the current denote file, creating it if necessary."
     (let* ((current-files (directory-files (denote-directory) t "__current\\.org$")))
       (if current-files
@@ -1270,8 +1095,165 @@ this is a mode to show colors in hex codes
             (call-interactively #'denote)
             (buffer-file-name))))))
 
+  (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
+                                 (list (my-denote-current-file-path))
+                                 (journals_to_org_agenda)))
 
-    (defun my-denote-open-current-year-archive ()
+  (defun journal-day-exists-p ( target )
+    "check if journal for a day already exists"
+    (file-expand-wildcards (concat denote-directory target "*_journal*.org")))
+
+  (defun find-previous-journal ()
+    "Find most recent journal"
+    (let* ((today (format-time-string "%Y%m%d"))
+           (all_journals (sort (directory-files "~/Dropbox/orgfiles/denotes" nil "^[0-9].*_journal.*org$") #'string>)))
+      (dolist (journal all_journals)
+        (when (string< (substring journal 0 8) today)
+          (cl-return journal)))))
+
+  (defun my-refile-tasks (file)
+    (interactive)
+    (let* ((org-archive-location (concat file "::* TASKS"))
+           (org-archive-save-context-info nil))
+
+      (goto-char (point-min))
+      (unless (re-search-forward "^\\* TASKS" nil t)
+        (goto-char (point-max))
+        (insert "* TASKS\n\n"))
+      (goto-char (point-max))
+      (while
+          (re-search-backward
+           "^\\*\\* \\(TODO\\|MAYBE\\|NEXT\\|STARTED\\|WAITING\\|DELEGATED\\|MEETING\\|SCHEDULED\\|DEADLINE\\)" nil t)
+        (org-archive-subtree))))
+
+  (defun move-todos()
+    (let ((filename (concat denote-directory
+                            (find-previous-journal))))
+      (find-file filename)
+      (my-refile-tasks (car
+                        (journal-day-exists-p
+                         (format-time-string "%Y%m%d"))))
+      (save-buffer)
+      (kill-buffer (buffer-name))))
+
+  (defun my-denote-journal-today ()
+    "Create an entry tagged 'journal' with the date as its title."
+    (interactive)
+    (let* ((today (format-time-string "%Y%m%d"))
+           (filename (car (journal-day-exists-p today)))
+           (prev (find-previous-journal)))
+      (if filename
+          (find-file filename)
+        (progn
+          (denote
+           (format-time-string "%Yw%W-%a %e %b")   ; format like 2022w48-Tue 29 Nov
+           '("journal")
+           nil
+           "~/Denotes")
+          (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n\n")
+          (save-buffer)
+          (move-todos)
+          (setq org-agenda-files (append '("~/Dropbox/orgfiles/todo.org")
+                                         (list (my-denote-current-file-path))
+                                         (journals_to_org_agenda)))))))
+
+  (defun my-denote-journal-date()
+    (declare (interactive-only t))
+    (interactive)
+    (let* ((date (org-read-date nil t))
+           (filename (car (journal-day-exists-p (format-time-string "%Y%m%d" date)))))
+      (if filename
+          (find-file filename)
+        (progn
+          (denote
+           (format-time-string "%Yw%W-%a %e %b" date)   ; format like Tuesday 14 June 2022
+           '("journal")
+           nil
+           "~/Denotes")
+          (insert "* THOUGHTS\n\n* NOTES\n\n* CODE\n\n* TASKS\n - Remember to call:\n\n (move-todos)")))))
+
+  (defun my-denote-archive-done-items ()
+    "Archive all DONE headings from current file to yearly archive file."
+    (interactive)
+    (when (and buffer-file-name
+               (string-match-p "__current\\.org$" buffer-file-name))
+      (let* ((current-file buffer-file-name)
+             (current-year (format-time-string "%Y"))
+             (identifier (denote-retrieve-filename-identifier current-file))
+             (archive-file (concat (file-name-directory current-file)
+                                   identifier "__" current-year ".org"))
+             (done-items '())
+             (archive-buffer nil))
+
+        ;; Collect all DONE items
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward "^\\*+ DONE " nil t)
+            (let ((start (line-beginning-position))
+                  (end (save-excursion
+                         (outline-next-heading)
+                         (if (eobp) (point) (1- (point))))))
+              (push (list start end (buffer-substring-no-properties start end)) done-items))))
+
+        ;; If we have DONE items, process them
+        (when done-items
+          ;; Create archive file if it doesn't exist
+          (unless (file-exists-p archive-file)
+            (with-temp-file archive-file
+              (insert (denote--format-front-matter
+                       (concat "Archive " current-year)
+                       (current-time)
+                       '("archive")
+                       identifier
+                       ""
+                       'org))
+              (insert "\n")))
+
+          ;; Open archive file
+          (setq archive-buffer (find-file-noselect archive-file))
+
+          ;; Append DONE items to archive file
+          (with-current-buffer archive-buffer
+            (goto-char (point-max))
+            (unless (bolp) (insert "\n"))
+            (dolist (item (reverse done-items))
+              (insert (nth 2 item))
+              (unless (bolp) (insert "\n")))
+            (save-buffer))
+
+          ;; Remove DONE items from current file (in reverse order to maintain positions)
+          (dolist (item done-items)
+            (delete-region (nth 0 item) (nth 1 item)))
+
+          (message "Archived %d DONE items to %s"
+                   (length done-items)
+                   (file-name-nondirectory archive-file))))))
+
+  ;; Add to save hook for current files
+  (defun my-denote-maybe-archive-on-save ()
+    "Archive DONE items if saving a current.org file."
+    (when (and buffer-file-name
+               (string-match-p "__current\\.org$" buffer-file-name))
+      (my-denote-archive-done-items)))
+
+  (add-hook 'after-save-hook #'my-denote-maybe-archive-on-save)
+
+  (defun my-denote-current-file ()
+    "Create or find the current denote file for ongoing notes."
+    (interactive)
+    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
+           (current-file (car current-files)))
+
+      (if current-file
+          (find-file current-file)
+        ;; Create new current file
+        (let ((denote-prompts '())
+              (denote-use-title "Current Notes")
+              (denote-use-keywords '("current"))
+              (denote-use-signature "current"))
+          (call-interactively #'denote)))))
+
+  (defun my-denote-open-current-year-archive ()
     "Open the archive file for the current year."
     (interactive)
     (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
@@ -1281,7 +1263,7 @@ this is a mode to show colors in hex codes
           (let* ((current-year (format-time-string "%Y"))
                  (identifier (denote-retrieve-filename-identifier current-file))
                  (archive-file (concat (file-name-directory current-file)
-                                      identifier "__" current-year ".org")))
+                                       identifier "__" current-year ".org")))
             (if (file-exists-p archive-file)
                 (find-file archive-file)
               (message "Archive file for %s doesn't exist yet" current-year)))
@@ -1290,7 +1272,58 @@ this is a mode to show colors in hex codes
   (global-set-key (kbd "C-c d A") #'my-denote-open-current-year-archive)
 #+end_src
 
-*** text input
+org-mode configurations
+#+begin_src emacs-lisp
+  (setq org-capture-templates
+        `(("n" "Note to Current File" entry
+           (file ,(lambda () (my-denote-current-file-path)))
+           "* NOTE %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:CAPTURED: %a\n:END:\n%?"
+           :prepend t)
+
+          ("j" "Journal Entry" entry
+           (file ,(lambda () (my-denote-current-file-path)))
+           "* %U %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%i"
+           :prepend t)
+
+          ("t" "Task to Current File" entry
+           (file ,(lambda () (my-denote-current-file-path)))
+           "* TODO %^{Task}\n:PROPERTIES:\n:CREATED: %U\n:SCHEDULE: %u\n:END:\n%?"
+           :prepend t)
+
+          ("m" "Meeting Notes" entry
+           (file ,(lambda () (my-denote-current-file-path)))
+           "* MEETING %? :meeting:\n  %U\n  \n** Attendees\n  - \n  \n** Agenda\n  - \n  \n** Notes\n  %i\n  \n** Action Items\n  - [ ] "
+           :prepend t)))
+
+  (defun my-denote-capture-note ()
+    "Quick capture a note to current file."
+    (interactive)
+    (org-capture nil "n"))
+
+  (defun my-denote-capture-task ()
+    "Quick capture a task to current file."
+    (interactive)
+    (org-capture nil "t"))
+
+  (defun my-denote-capture-journal ()
+    "Quick capture a journal entry to current file."
+    (interactive)
+    (org-capture nil "j"))
+
+  (defun my-denote-capture-meeting ()
+    "Quick capture meeting notes to current file."
+    (interactive)
+    (org-capture nil "m"))
+
+  ;; Keybindings
+  (global-set-key (kbd "C-c d c") #'my-denote-current-file)
+  (global-set-key (kbd "C-c d n") #'my-denote-capture-note)
+  (global-set-key (kbd "C-c d t") #'my-denote-capture-task)
+  (global-set-key (kbd "C-c d j") #'my-denote-capture-journal)
+  (global-set-key (kbd "C-c d m") #'my-denote-capture-meeting)
+  (global-set-key (kbd "C-c d a") #'my-denote-archive-done-items)
+#+end_src
+** text input
 #+begin_src emacs-lisp
   (defun my-create-header (text)
     "Create a stylized header with TEXT centered in 80 characters."
@@ -1311,6 +1344,7 @@ this is a mode to show colors in hex codes
       (insert text-line "\n")
       (insert header-line "\n")))
 #+end_src
+
 
 * COMMENT Unused Configurations
 Some packages I have used in the past, but for some reason I stoped using them, but the configuration might still be useful for someone, so I keep it here until I feel like cleaning this part.

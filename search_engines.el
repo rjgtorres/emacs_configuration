@@ -1,4 +1,4 @@
-;; this file contains search engine defenitions for engine-mode
+;;; this file contains search engine defenitions for engine-mode
 
 (defengine amazon
   "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Daps&field-keywords=%s")
@@ -14,10 +14,13 @@
 
 (defengine duckduckgo
   "https://duckduckgo.com/?q=%s"
-  :keybinding "d")
+  :keybinding "d"
+  :browser 'eww-browse-url)
 
 (defengine github
-  "https://github.com/search?ref=simplesearch&q=%s")
+  "https://github.com/search?ref=simplesearch&q=%s"
+  :keybinding "h"
+  :browser 'eww-browse-url)
 
 (defengine google
   "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
@@ -41,15 +44,17 @@
 
 (defengine stack-overflow
   "https://stackoverflow.com/search?q=%s"
-  :keybinding "k")
+  :keybinding "k"
+  :browser 'eww-browse-url)
 
-(defengine twitter
-  "https://twitter.com/search?q=%s")
+;; (defengine twitter
+;;   "https://twitter.com/search?q=%s")
 
 (defengine wikipedia
   "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
   :keybinding "w"
-  :docstring "Searchin' the wikis.")
+  :docstring "Searchin' the wikis."
+  :browser 'eww-browse-url)
 
 (defengine wiktionary
   "https://www.wikipedia.org/search-redirect.php?family=wiktionary&language=en&go=Go&search=%s")
@@ -63,8 +68,10 @@
 
 (defengine hyperspec
   "http://www.lispworks.com/cgi-bin/search.cgi?q=%s&t=-D--HB-"
-  :keybinding "l")
+  :keybinding "l"
+  :browser 'eww-browse-url)
 
 (defengine scryfall
   "https://scryfall.com/search?q=%s"
-  :keybinding "s")
+  :keybinding "s"
+  :browser 'eww-browse-url)
