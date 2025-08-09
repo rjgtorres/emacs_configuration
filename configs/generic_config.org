@@ -198,6 +198,7 @@ I believe that by using the doom modeline this package becomes not necessary
 **** Doom modeline
 #+begin_src emacs-lisp
   (use-package doom-modeline
+    :straight t
     :hook (after-init . doom-modeline-mode))
 #+end_src
 **** moe theme
@@ -213,6 +214,7 @@ my current theme, it has some minor changes compared to the origial, mainly the 
 **** helm
   #+BEGIN_SRC emacs-lisp
     (use-package helm
+      :straight t
       :diminish helm-mode
       :config
       (helm-mode 1)
@@ -251,7 +253,9 @@ package to display icons
 In a new installation it is needed to install the icons to be displayed: M-x all-the-icons-install-fonts
 in windows it is needed to go to the folder where the fonts are downloaded, open and install those fonts
   #+BEGIN_SRC emacs-lisp
-    (use-package all-the-icons)
+    (use-package all-the-icons
+      :straight t
+      :defer t)
     (use-package all-the-icons-dired
       :ensure t
       :init
@@ -260,6 +264,7 @@ in windows it is needed to go to the folder where the fonts are downloaded, open
 **** persistent scratch
     #+BEGIN_SRC emacs-lisp
       (use-package persistent-scratch
+        :straight t
         :init
         (persistent-scratch-setup-default)
         (persistent-scratch-autosave-mode 1))
@@ -368,29 +373,42 @@ the next directive enables opening a folder in the same buffer, without generati
 *** Programming helpers
 **** Magit
    #+BEGIN_SRC emacs-lisp
-     (use-package magit)
+          (use-package magit
+            :straight t)
    #+END_SRC
 **** company-mode
  #+begin_src emacs-lisp
-     (use-package company
-       :after lsp-mode
-       :hook (lsp-mode . company-mode)
-       :bind (:map lsp-mode-map
-              ("<tab>" . company-indent-or-complete-common))
-       :config
-   (setq company-show-numbers            t
-         company-minimum-prefix-length   1
-         company-idle-delay              0.5
-         company-backends
-         '((company-files          ; files & directory
-            company-keywords       ; keywords
-            company-capf           ; what is this?
-            company-yasnippet)
-           (company-abbrev company-dabbrev))))
+        (use-package company
+          :straight t
+          :after lsp-mode
+          :init
+          (add-hook 'after-init-hook 'global-company-mode)
+          :hook (lsp-mode . company-mode)
+          :bind (:map lsp-mode-map
+                 ("<tab>" . company-indent-or-complete-common))
+          ;; :bind (:map company-active-map
+          ;;   ("<tab>" . company-complete-selection))
+          :config
+      (setq company-show-numbers            t
+            company-minimum-prefix-length   1
+            company-idle-delay              0
+            company-selection-wrap-around t
+            company-backends
+            '((company-files          ; files & directory
+               company-keywords       ; keywords
+               company-capf           ; what is this?
+               company-yasnippet)
+              (company-abbrev company-dabbrev))))
 
- (use-package company-box
-   :after company
-   :hook (company-mode . company-box-mode))
+    (use-package company-box
+      :straight t
+      :after company
+      :hook (company-mode . company-box-mode))
+
+   (use-package slime-company
+   :config
+   (slime-setup '(slime-company)))
+
  #+end_src
 **** copilot
 #+begin_src emacs-lisp
@@ -408,7 +426,7 @@ the next directive enables opening a folder in the same buffer, without generati
 #+end_src
 **** Languages
 ***** Generic
-****** COMMENT tree-sitter
+****** tree-sitter
        #+begin_src emacs-lisp
          (use-package treesit
            :when (and (fboundp 'treesit-available-p)
@@ -433,7 +451,7 @@ the next directive enables opening a folder in the same buffer, without generati
                    (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
                    (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
                    (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
-                   (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
+                   (toml       . ("https://github.com/tree-sitter/tree-sitter-toml")))))
            (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
            (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
            (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
@@ -448,50 +466,54 @@ the next directive enables opening a folder in the same buffer, without generati
        #+end_src
 ****** lsp-mode
        #+BEGIN_SRC emacs-lisp
-                  (use-package lsp-mode
-                    :commands (lsp lsp-deferred)
-                    :init
-                    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-                    :hook ((prog-mode . lsp-deferred)
-                           (f90-mode . lsp-mode)
-                           (python-mode . lsp-mode)
-                           (c-mode . lsp)
-                           (c++-mode . lsp)
-                           (lsp-mode . lsp-enable-which-key-integration))
-                    :config
-                    (progn
-                      (lsp-register-client
-                       (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
-                                        :major-modes '(c-mode c++-mode)
-                                        :remote? t
-                                        :server-id 'clangd-remote))))
-                  (setq gc-cons-threshold 100000000) ;; necessary due to communication
-                  (use-package helm-lsp
-                    :config
-                    (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
-                  (use-package lsp-ui
-                    :hook (lsp-mode . lsp-ui-mode)
-                    :custom
-                    (lsp-ui-doc-position 'bottom))
-                  ;; (use-package lsp-treemacs
-                  ;;   ;; project wide overview
-                  ;;   :commands lsp-treemacs-errors-list)
-                  ;; (use-package lsp-sonarlint
-                  ;;   :custom
-                  ;;   ;; Allow sonarlint to download and unzip the official VSCode extension
-                  ;;   ;; If nil, you'll have to do that yourself. See also `lsp-sonarlint-download'
-                  ;;   ;; `lsp-sonarlint-download-url' and `lsp-sonarlint-download-dir'
-                  ;;   (lsp-sonarlint-auto-download t)
+	 (use-package lsp-mode
+	   :straight t
+	   :commands (lsp lsp-deferred)
+	   :init
+	   (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+	   :hook ((prog-mode . lsp-deferred)
+	          (f90-mode . lsp-mode)
+	          (python-mode . lsp-mode)
+	          (c-mode . lsp)
+	          (c++-mode . lsp)
+	          (lsp-mode . lsp-enable-which-key-integration))
+	   :config
+	   (progn
+	     (lsp-register-client
+	      (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+	                       :major-modes '(c-mode c++-mode)
+	                       :remote? t
+	                       :server-id 'clangd-remote))))
+	 (setq gc-cons-threshold 100000000) ;; necessary due to communication
+	 (use-package helm-lsp
+	   :straight t
+	   :config
+	   (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+	 (use-package lsp-ui
+	   :straight t
+	   :hook (lsp-mode . lsp-ui-mode)
+	   :custom
+	   (lsp-ui-doc-position 'bottom))
+	 ;; (use-package lsp-treemacs
+	 ;;   ;; project wide overview
+	 ;;   :commands lsp-treemacs-errors-list)
+	 ;; (use-package lsp-sonarlint
+	 ;;   :custom
+	 ;;   ;; Allow sonarlint to download and unzip the official VSCode extension
+	 ;;   ;; If nil, you'll have to do that yourself. See also `lsp-sonarlint-download'
+	 ;;   ;; `lsp-sonarlint-download-url' and `lsp-sonarlint-download-dir'
+	 ;;   (lsp-sonarlint-auto-download t)
 
-                  ;;   ;; Choose which analyzers you want enabled. By default all are enabled
-                  ;;   ;; See command `lsp-sonarlint-available-analyzers' for the full list.
-                  ;;   (lsp-sonarlint-enabled-analyzers '("cfamily"))
-                  ;;   (lsp-sonarlint-cfamily-compilation-commands-path "./build/"))
+	 ;;   ;; Choose which analyzers you want enabled. By default all are enabled
+	 ;;   ;; See command `lsp-sonarlint-available-analyzers' for the full list.
+	 ;;   (lsp-sonarlint-enabled-analyzers '("cfamily"))
+	 ;;   (lsp-sonarlint-cfamily-compilation-commands-path "./build/"))
        #+END_SRC
 
 ****** dap-mode
 #+begin_src emacs-lisp
   (use-package dap-mode
+    :straight t
   :defer
   :custom
   (dap-auto-configure-mode t                           "Automatically configure dap.")
@@ -523,34 +545,36 @@ the next directive enables opening a folder in the same buffer, without generati
 #+end_src
 ****** yasnippet
        #+begin_src emacs-lisp
-         (use-package yasnippet
-           :init (yas-global-mode 1)
-           ;; :hook (prog-mode-hook . yas-minor-mode)
-           :commands yas-reload-all)
- ;; This illustrates how to redefine yas-expand to S-TAB.
- (define-key yas-minor-mode-map [backtab]     'yas-expand)
+	         (use-package yasnippet
+	 	  :straight t
+	           :init (yas-global-mode 1)
+	           ;; :hook (prog-mode-hook . yas-minor-mode)
+	           :commands yas-reload-all)
+	 ;; This illustrates how to redefine yas-expand to S-TAB.
+	 (define-key yas-minor-mode-map [backtab]     'yas-expand)
 
- ;; Strangely, just redefining one of the variations below won't work.
- ;; All rebinds seem to be needed.
- (define-key yas-minor-mode-map [(tab)]        nil)
- (define-key yas-minor-mode-map (kbd "TAB")    nil)
- (define-key yas-minor-mode-map (kbd "<tab>")  nil)
+	 ;; Strangely, just redefining one of the variations below won't work.
+	 ;; All rebinds seem to be needed.
+	 (define-key yas-minor-mode-map [(tab)]        nil)
+	 (define-key yas-minor-mode-map (kbd "TAB")    nil)
+	 (define-key yas-minor-mode-map (kbd "<tab>")  nil)
 
        #+end_src
 ****** flycheck
        #+begin_src emacs-lisp
- ;; flycheck
- (use-package flycheck
-   :init (global-flycheck-mode)
-   :config
-   (setq flycheck-display-errors-function
-         #'flycheck-display-error-messages-unless-error-list)
-   (setq flycheck-indication-mode nil))
+         ;; flycheck
+         (use-package flycheck
+           :straight t
+           :init (global-flycheck-mode)
+           :config
+           (setq flycheck-display-errors-function
+                 #'flycheck-display-error-messages-unless-error-list)
+           (setq flycheck-indication-mode nil))
 
- (use-package flycheck-pos-tip
-   :after flycheck
-   :config
-   (flycheck-pos-tip-mode))
+         (use-package flycheck-pos-tip
+           :after flycheck
+           :config
+           (flycheck-pos-tip-mode))
        #+end_src
 ***** Python
        #+BEGIN_SRC emacs-lisp
@@ -609,33 +633,20 @@ the next directive enables opening a folder in the same buffer, without generati
 **** Rainbow delimiters
 helps identifying matching parentesis easily. In LISP it is really important
   #+BEGIN_SRC emacs-lisp
-  (use-package rainbow-delimiters
-  :init
-  (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
+    (use-package rainbow-delimiters
+      :straight t
+    :init
+    (add-hook 'prog-mode-hook #'rainbow-delimiters-mode))
   #+END_SRC
 **** electric-pair-mode
 does the same as Autopais, but is already included in emacs
   #+BEGIN_SRC emacs-lisp
     (electric-pair-mode t)
   #+END_SRC
-**** company-mode
-#+begin_src emacs-lisp
-  (use-package company
-    :init
-    (add-hook 'after-init-hook 'global-company-mode)
-    :config
-    (setq company-idle-delay 0
-          company-minimum-prefix-length 2
-          company-selection-wrap-around t)
-    :bind (:map company-active-map
-           ("<tab>" . company-complete-selection)))
-  (use-package slime-company
-  :config
-  (slime-setup '(slime-company)))
-#+end_src
 **** hl-todo
 #+begin_src emacs-lisp
   (use-package hl-todo
+    :straight t
     :init
     (global-hl-todo-mode t))
   (keymap-set hl-todo-mode-map "C-c t p" #'hl-todo-previous)
@@ -665,6 +676,7 @@ does the same as Autopais, but is already included in emacs
 **** projectile
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
+    :straight t
     :config (projectile-mode)
     :custom ((projectile-completion-system 'helm))
     :bind-keymap
@@ -738,7 +750,8 @@ does the same as Autopais, but is already included in emacs
                                       ("training" . ?t)
                                       ("configuration" . ?f)))
      (setq org-babel-python-command "/usr/bin/python3")
-     (use-package helm-org)
+     (use-package helm-org
+       :straight t)
      (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
      (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
 
@@ -864,10 +877,11 @@ This configuration is based in a presentation by Daviwil in this [[https://www.y
 #+end_src
 **** denote
 #+begin_src emacs-lisp
-  (use-package denote)
-  (setq denote-directory (expand-file-name "~/Dropbox/orgfiles/denotes/"))
-  (setq denote-known-keywords '("emacs" "programming" "journal"))
-  (setq denote-date-prompt-use-org-read-date t)
+    (use-package denote
+      :straight t)
+    (setq denote-directory (expand-file-name "~/Dropbox/orgfiles/denotes/"))
+    (setq denote-known-keywords '("emacs" "programming" "journal"))
+    (setq denote-date-prompt-use-org-read-date t)
 #+end_src
 **** org babel
    #+BEGIN_SRC emacs-lisp
@@ -882,8 +896,9 @@ This configuration is based in a presentation by Daviwil in this [[https://www.y
 **** org-superstar
 mainly eye candy but at least I don't need to see so many * and so org mode is more condensed
    #+BEGIN_SRC emacs-lisp
-   (use-package org-superstar
-      :hook (org-mode . (lambda () (org-superstar-mode 1))))
+     (use-package org-superstar
+       :straight t
+        :hook (org-mode . (lambda () (org-superstar-mode 1))))
    #+END_SRC
 
 **** calendar
@@ -937,18 +952,20 @@ mainly eye candy but at least I don't need to see so many * and so org mode is m
 **** add search engines to search
 search several places from emacs
    #+BEGIN_SRC emacs-lisp
-   (use-package engine-mode
-      :config
-      (engine-mode t))
-    ;; to change the default browser from firefox to eww uncomment the following line
-    ;;(setq engine/browser-function 'eww-browse-url)
-    ;; the search engines are defined in file:
-    (load (expand-file-name "~/.emacs.d/search_engines.el"))
+     (use-package engine-mode
+       :straight t
+        :config
+        (engine-mode t))
+      ;; to change the default browser from firefox to eww uncomment the following line
+      ;;(setq engine/browser-function 'eww-browse-url)
+      ;; the search engines are defined in file:
+      (load (expand-file-name "~/.emacs.d/search_engines.el"))
    #+END_SRC
 **** writeroom mode
 a mode to hide all distraction from emacs and keep focused in the current document and work
    #+BEGIN_SRC emacs-lisp
      (use-package writeroom-mode
+       :straight t
        :bind(([f5] . 'writeroom-mode)))
    #+END_SRC
 **** COMMENT command log
@@ -959,11 +976,13 @@ Package useful for making emacs demonstrations
 
 **** terminal emulator (vterm)
      #+begin_src emacs-lisp
-       (use-package vterm)
+              (use-package vterm
+       	 :straight t)
      #+end_src
 **** reddigg (reddit reader)
      #+begin_src emacs-lisp
        (use-package reddigg
+         :straight t
          :config
          (setq org-confirm-elisp-link-function nil
                reddigg-subs '(emacs portugal Common_Lisp Algarve Faro EDH Fantasy lisp mtg magicTCG odivelas sbcl DevinTownsend devpt brompton)))
@@ -987,6 +1006,7 @@ Package useful for making emacs demonstrations
 **** pdf-tools
      #+begin_src emacs-lisp
        (use-package pdf-tools
+         :straight t
          :config (pdf-loader-install)
          :hook (pdf-view-mode . (lambda ()
                                   (pdf-tools-enable-minor-modes))))
@@ -995,7 +1015,8 @@ Package useful for making emacs demonstrations
 **** rainbow-mode
 this is a mode to show colors in hex codes
 #+begin_src emacs-lisp
-  (use-package rainbow-mode)
+    (use-package rainbow-mode
+      :straight t)
 #+end_src
 **** emmet (matrix client)
 #+begin_src emacs-lisp
@@ -1082,7 +1103,7 @@ this is a mode to show colors in hex codes
 
   (defun my-denote-current-file-path ()
     "Return the path to the current denote file, creating it if necessary."
-    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$")))
+    (let* ((current-files (directory-files denote-directory t "__current\\.org$")))
       (if current-files
           (car current-files)
         ;; Create current file if it doesn't exist
@@ -1239,7 +1260,7 @@ this is a mode to show colors in hex codes
   (defun my-denote-current-file ()
     "Create or find the current denote file for ongoing notes."
     (interactive)
-    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
+    (let* ((current-files (directory-files denote-directory t "__current\\.org$"))
            (current-file (car current-files)))
 
       (if current-file
@@ -1254,7 +1275,7 @@ this is a mode to show colors in hex codes
   (defun my-denote-open-current-year-archive ()
     "Open the archive file for the current year."
     (interactive)
-    (let* ((current-files (directory-files (denote-directory) t "__current\\.org$"))
+    (let* ((current-files (directory-files denote-directory t "__current\\.org$"))
            (current-file (car current-files)))
 
       (if current-file

@@ -34,7 +34,6 @@
     (package-install 'use-package t))
   (setq-default
    use-package-always-defer t)
-(require 'org)
 ;; bootstrap straight
 (defvar bootstrap-version)
 (let ((bootstrap-file
