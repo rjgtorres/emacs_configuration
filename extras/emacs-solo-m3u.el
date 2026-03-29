@@ -29,7 +29,7 @@
     '(("Full List" . "https://raw.githubusercontent.com/junguler/m3u-radio-music-playlists/refs/heads/main/---everything-full.m3u")
       ("Metal" . "https://raw.githubusercontent.com/junguler/m3u-radio-music-playlists/refs/heads/main/metal.m3u")
       ("Portugal" . "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/M3UPT.m3u")
-      ;; ("personal" . "`(expand-file-name "configs/radios.m3u" user-emacs-directory)")
+      ("personal" . "https://raw.githubusercontent.com/rjgtorres/emacs_configuration/refs/heads/master/configs/radios.m3u")
       )
     "Alist of named M3U radio sources.")
 
@@ -267,7 +267,7 @@ logo field in `m3u-visualizer--entries' with a propertized string that has a
       ;; Rebuild the table from the (now-modified) m3u-visualizer--entries
       (m3u-visualizer--refresh)))
 
-  (global-set-key (kbd "C-c r") #'emacs-solo/get-online-radio-list-m3u)
+  (global-set-key (kbd "C-c m") #'emacs-solo/get-online-radio-list-m3u)
   (define-key m3u-visualizer-mode-map (kbd "RET") #'m3u-visualizer-play-current)
   (define-key m3u-visualizer-mode-map (kbd "x")   #'m3u-visualizer-stop-mpv)
   (define-key m3u-visualizer-mode-map (kbd "n")   #'next-line)

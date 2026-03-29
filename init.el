@@ -1,8 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+(require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
 (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-(add-hook 'text-mode-hook 'variable-pitch-mode)
 
 (use-package emacs
   :ensure nil
@@ -360,17 +360,6 @@ Use ⇒ if displayable, otherwise fallback to =>."
                 (when (file-exists-p private-file)
                   (load private-file)))))
 
-  ;; FONT configuration
-  ;; this fonts need to be installed, copy them to ~/.local/share/fonts
-  (defvar my/variable-width-font "Source Serif Pro"
-    "The font to use for variable-pitch (document) text.")
-  (defvar my/fixed-width-font "Iosevka Term Slab Md Ex"
-    "The font to use for variable-pitch (document) text.")
-
-  (set-face-attribute 'default nil :font my/fixed-width-font :weight 'medium :height 100)
-  (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'medium :height 100)
-  (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'medium :height 1.2)
-
   :init
   ;; Keep margins from automatic resizing
   (defun emacs-solo/set-default-window-margins ()
@@ -400,7 +389,30 @@ or is an ERC buffer."
   (winner-mode)
   (xterm-mouse-mode 1)
   (file-name-shadow-mode 1) ; allows us to type a new path without having to delete the current one
-)
+  )
+
+  ;; FONT configuration
+  ;; this fonts need to be installed, copy them to ~/.local/share/fonts
+  (defvar my/variable-width-font "Source Serif Pro"
+    "The font to use for variable-pitch (document) text.")
+  (defvar my/fixed-width-font "Iosevka Term Slab Md Ex"
+    "The font to use for variable-pitch (document) text.")
+
+  ;; (set-face-attribute 'default nil :font my/fixed-width-font :weight 'medium :height 110)
+  ;; (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'medium :height 110)
+  ;; (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'medium :height 1.2)
+  ;; (add-hook 'text-mode-hook 'variable-pitch-mode)
+
+(defun my/set-fonts ()
+  (interactive)
+  ;; Set font based on existing ones
+  (set-face-attribute 'default nil :font my/fixed-width-font :weight 'medium :height 110)
+  (set-face-attribute 'fixed-pitch nil :font my/fixed-width-font :weight 'medium :height 110)
+  (set-face-attribute 'variable-pitch nil :font my/variable-width-font :weight 'medium :height 1.2)
+  (add-hook 'text-mode-hook 'variable-pitch-mode))
+
+(add-hook 'after-init-hook #'my/set-fonts)
+(add-hook 'server-after-make-frame-hook #'my/set-fonts)
 
 (use-package compile
   :ensure nil
@@ -731,10 +743,13 @@ If ###@### is found, remove it and place point there at the end."
     (moe-theme-flavour-darkmate)
     (moe-theme-apply-color 'g/b)))
 
+(setq image-types (cons 'svg image-types))
+
 (add-to-list 'load-path (expand-file-name "extras" user-emacs-directory))
 (require 'emacs-solo-exec-path-from-shell)
 (require 'rdt-persistent-scratch)
 (require 'rdt-icons)
+(require 'rdt-magit)
 (require 'rdt-helm)
 (require 'rdt-casual)
 (require 'rdt-org)
@@ -747,9 +762,11 @@ If ###@### is found, remove it and place point there at the end."
 (require 'rdt-media)
 (require 'emacs-solo-yt)
 (require 'emacs-solo-weather)
+(require 'emacs-solo-m3u)
 (require 'rdt-rand-elisp)
+
 (message (emacs-init-time))
- 
+
 
 ;; todo remove this:
 
