@@ -6,10 +6,14 @@
 !.gitignore
 
 !torresconfig.org
+!early-init.el
 !init.el
 !search_engines.el
 !config-session.el
 !configs/*.org
+!configs/*.m3u
 !gendoxy.el
 !snippets/**
 !elfeed.org
+
+!extras/**
