@@ -74,7 +74,27 @@
                                    (holiday-fixed 12 1 "Restauração da Independência")
                                    (holiday-fixed 12 8 "Dia Imaculada conceição")
                                    (holiday-fixed 12 25 "Christmas"))))
-  
+
+  (use-package org-modern
+    :ensure t
+    :hook
+    (org-mode . org-modern-mode)
+    ;; :custom
+    ;; (org-modern-table nil)
+    ;; (org-modern-keyword nil)
+    ;; (org-modern-timestamp nil)
+    ;; (org-modern-priority nil)
+    ;; (org-modern-checkbox nil)
+    ;; (org-modern-tag nil)
+    ;; (org-modern-block-name nil)
+    ;; (org-modern-keyword nil)
+    ;; (org-modern-footnote nil)
+    ;; (org-modern-internal-target nil)
+    ;; (org-modern-radio-target nil)
+    ;; (org-modern-statistics nil)
+    ;; (org-modern-progress nil)
+    )
+
   
   (use-package helm-org
     :ensure t)
@@ -105,9 +125,9 @@
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
   (setq org-startup-with-inline-images t)
 
-  (use-package org-superstar
-    :ensure t
-    :hook (org-mode . (lambda () (org-superstar-mode t))))
+  ;; (use-package org-superstar
+  ;;   :ensure t
+  ;;   :hook (org-mode . (lambda () (org-superstar-mode t))))
 
   ;; Denote
   (use-package denote

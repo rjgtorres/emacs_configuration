@@ -267,7 +267,7 @@ logo field in `m3u-visualizer--entries' with a propertized string that has a
       ;; Rebuild the table from the (now-modified) m3u-visualizer--entries
       (m3u-visualizer--refresh)))
 
-  (global-set-key (kbd "C-c m") #'emacs-solo/get-online-radio-list-m3u)
+  (global-set-key (kbd "C-c v") #'emacs-solo/get-online-radio-list-m3u)
   (define-key m3u-visualizer-mode-map (kbd "RET") #'m3u-visualizer-play-current)
   (define-key m3u-visualizer-mode-map (kbd "x")   #'m3u-visualizer-stop-mpv)
   (define-key m3u-visualizer-mode-map (kbd "n")   #'next-line)

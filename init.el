@@ -1,8 +1,16 @@
 ;; -*- lexical-binding: t; -*-
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+
+(use-package package
+  :config
+  (add-to-list 'package-archives
+               '("melpa" . "https://melpa.org/packages/"))
+  (package-initialize))
+
+(use-package use-package
+  :custom
+  (package-native-compile t)
+  (warning-minimum-level :emergency))
 
 (use-package emacs
   :ensure nil
@@ -58,6 +66,7 @@
   (global-visual-line-mode t)
   (browse-url-secondary-browser-function 'eww-browse-url) ; C-u C-c RET on URLs open in EWW
   (help-window-select t)
+  (highlight-nonselected-windows nil)
   (history-length 800)
   (inhibit-startup-message t)
   (ibuffer-human-readable-size t) ; EMACS-31
@@ -79,6 +88,7 @@
   (recentf-auto-cleanup (if (daemonp) 300 'never))
   (recentf-exclude (list "^/\\|su\\|sudo\\)?:"))
   (recentf-save-file (expand-file-name "cache/recentf" user-emacs-directory))
+  (redisplay-skip-fontification-on-input t)
   (register-use-preview t)
   (remote-file-name-inhibit-delete-by-moving-to-trash t)
   (remote-file-name-inhibit-auto-save t)
@@ -88,6 +98,7 @@
   (tramp-use-scp-direct-remote-copying t)
   (tramp-verbose 2)
   (resize-mini-windows 'grow-only)
+  (save-interprogram-paste-before-kill t)
   (scroll-conservatively 8)
   (scroll-margin 5)
   (set-mark-command-repeat-pop t) ; So we can use C-u C-SPC C-SPC C-SPC... instead of C-u C-SPC C-u C-SPC...
@@ -145,6 +156,7 @@
   (global-set-key (kbd "M-<up>") (kbd "C-u 2 M-v"))
   (setq show-paren-delay 0)
   (setq-default cursor-type 'bar)
+  (setq-default cursor-in-non-selected-windows nil)
 
   (setf display-time-24hr-format t)
   (display-time-mode t)
@@ -160,6 +172,10 @@
   ;; Makes everything accept utf-8 as default, so buffers with tsx and so
   ;; won't ask for encoding (because undecided-unix) every single keystroke
   (modify-coding-system-alist 'file "" 'utf-8)
+
+  (setq-default bidi-display-reordering 'left-to-right)
+  (setq-default bidi-paragraph-direction 'left-to-right)
+  (setq bidi-inhibit-bpa t)
 
   ;; We want auto-save, but no #file# cluterring, so everything goes under our config cache/
   (make-directory (expand-file-name "cache/auto-saves/" user-emacs-directory) t)
@@ -198,7 +214,7 @@
   ;; Set line-number-mode with relative numbering
   (setq display-line-numbers-type 'relative)
   (add-hook 'prog-mode-hook #'display-line-numbers-mode)
-  (add-hook 'text-mode-hook #'display-line-numbers-mode)
+  ;; (add-hook 'text-mode-hook #'display-line-numbers-mode)
 
   ;; Starts `completion-preview-mode' automatically in some modes
   (add-hook 'prog-mode-hook #'completion-preview-mode)
@@ -361,19 +377,19 @@ Use ⇒ if displayable, otherwise fallback to =>."
                   (load private-file)))))
 
   :init
-  ;; Keep margins from automatic resizing
-  (defun emacs-solo/set-default-window-margins ()
-    "Set default left and right margins for all windows.
-Unless the buffer uses `emacs-solo/center-document-mode`
-or is an ERC buffer."
-    (interactive)
-    (dolist (window (window-list))
-      (with-current-buffer (window-buffer window)
-        (unless (or (bound-and-true-p emacs-solo/center-document-mode)
-                    (derived-mode-p 'erc-mode))
-          (set-window-margins window 2 0))))) ;; (LEFT RIGHT)
+;;   ;; Keep margins from automatic resizing
+;;   (defun emacs-solo/set-default-window-margins ()
+;;     "Set default left and right margins for all windows.
+;; Unless the buffer uses `emacs-solo/center-document-mode`
+;; or is an ERC buffer."
+;;     (interactive)
+;;     (dolist (window (window-list))
+;;       (with-current-buffer (window-buffer window)
+;;         (unless (or (bound-and-true-p emacs-solo/center-document-mode)
+;;                     (derived-mode-p 'erc-mode))
+;;           (set-window-margins window 2 0))))) ;; (LEFT RIGHT)
 
-  (add-hook 'window-configuration-change-hook #'emacs-solo/set-default-window-margins)
+;;   (add-hook 'window-configuration-change-hook #'emacs-solo/set-default-window-margins)
 
   (when (>= emacs-major-version 31)
     (tty-tip-mode nil))   ;; EMACS-31
@@ -754,6 +770,7 @@ If ###@### is found, remove it and place point there at the end."
 (require 'rdt-casual)
 (require 'rdt-org)
 (require 'rdt-lsp)
+(require 'rdt-flycheck)
 (require 'rdt-completions)
 (require 'rdt-ai)
 (require 'rdt-common-lisp)
