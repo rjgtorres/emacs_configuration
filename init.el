@@ -42,8 +42,8 @@
   (auto-save-default t)
   (bookmark-file (expand-file-name "cache/bookmarks" user-emacs-directory))
   (shared-game-score-directory (expand-file-name "cache/games/" user-emacs-directory)) ; FIXME: is this even working?
-  (calendar-latitude 38.72)                   ;; These are needed
-  (calendar-longitude -9.14)                 ;; for M-x `sunrise-sunset'
+  (calendar-latitude 38.791247)                   ;; These are needed
+  (calendar-longitude -9.179184)                 ;; for M-x `sunrise-sunset'
   (calendar-location-name "Lisbon, PT")
   (column-number-mode t)
   (line-number-mode t)
@@ -64,7 +64,6 @@
   (global-goto-address-mode t)                            ;     C-c RET on URLs open in default browser
   (global-hl-line-mode t)
   (global-visual-line-mode t)
-  (browse-url-secondary-browser-function 'eww-browse-url) ; C-u C-c RET on URLs open in EWW
   (help-window-select t)
   (highlight-nonselected-windows nil)
   (history-length 800)
@@ -673,7 +672,7 @@ Use ⇒ if displayable, otherwise fallback to =>."
 (use-package abbrev
   :ensure nil
   :init
-    ;; hook abbrev mode to the modes
+  ;; hook abbrev mode to the modes
   (dolist (hook '(f90-ts-mode-hook
                   c++-ts--mode-hook
                   org-mode-hook
@@ -743,8 +742,66 @@ If ###@### is found, remove it and place point there at the end."
 
   (define-abbrev-table 'markdown-mode-abbrev-table
     '(("cb" "```@\n\n```"
-       (lambda () (search-backward "@") (delete-char 1)))))
-  )
+       (lambda () (search-backward "@") (delete-char 1))))))
+
+;; eww configs
+(use-package browser
+  :ensure nil
+  :config
+  (defun my-browse-url-mpv (url &rest _args)
+    "Open URL in mpv."
+    (start-process "mpv" nil "mpv" url))
+
+  (defun my-browse-url-pdf (url &rest _args)
+    "Fetch remote PDF and open in pdf-tools within Emacs."
+    (let ((tmp (make-temp-file "emacs-pdf-" nil ".pdf")))
+      (url-copy-file url tmp t)
+      (find-file-other-window tmp)
+      (pdf-view-mode)))
+  (defun my/eww-download-image-at-point ()
+    "Download image at point to `eww-download-directory'."
+    (interactive)
+    (let ((url (or (get-text-property (point) 'image-url)
+                   (get-text-property (point) 'shr-url))))
+      (if (not url)
+          (message "No image at point")
+        (let* ((filename (file-name-nondirectory (url-filename (url-generic-parse-url url))))
+               (dest (expand-file-name filename eww-download-directory)))
+          (url-copy-file url dest t)
+          (message "Saved: %s" dest)))))
+  :custom
+  (eww-download-directory (expand-file-name "~/Downloads/"))
+
+  (browse-url-handlers
+   '(("\\(youtube\\.com\\|youtu\\.be\\|vimeo\\.com\\|twitch\\.tv\\)" . my-browse-url-mpv)
+     ("\\.mp4$" . my-browse-url-mpv)
+     ("\\.pdf$" . my-browse-url-pdf)
+     ("." . eww-browse-url)))
+
+  ;; Keep your fallback setting
+  (browse-url-secondary-browser-function 'browse-url-generic)
+  (browse-url-generic-program "firefox")
+
+  ;; (shr-width 100)
+  ;; (shr-max-width 120)
+  ;; (shr-indentation 4)
+
+  ;; (shr-use-fonts nil)
+  ;; (shr-max-image-size '(800 . 600))
+  (shr-image-animate t)
+  :bind (:map
+         eww-mode-map
+         ("=" text-scale-increase)
+         ("-" text-scale-decrease)
+         ("0" text-scale-adjust)
+         ("U" shr-copy-url)
+         ("I" my/eww-download-image-at-point)))
+
+(use-package image
+  :ensure nil
+  :custom
+  ;; Enable converting external formats (ie. webp) to internal ones.
+  (image-use-external-converter t))
 
 ;;; │ Theme
 (message "loading theme")
@@ -758,8 +815,6 @@ If ###@### is found, remove it and place point there at the end."
     :config
     (moe-theme-flavour-darkmate)
     (moe-theme-apply-color 'g/b)))
-
-(setq image-types (cons 'svg image-types))
 
 (add-to-list 'load-path (expand-file-name "extras" user-emacs-directory))
 (require 'emacs-solo-exec-path-from-shell)
