@@ -34,6 +34,20 @@
   (defvar-local youtube--thumbnail-cache nil
     "Alist mapping thumbnail URL -> propertized display string.")
 
+    (defvar my/yt-channels '("LSVargas"
+                             "LinusTechTips"
+                             "LateNightSeth"
+                             "ADifferentBias"
+                             "dvntownsend⁩"
+                             "NunseDesgrace"
+                             "ThePrimeTimeagen"
+                             "ThePrimeagen"
+                             "ColbertLateShow"
+                             "TsodingDaily"
+                             "MTGGoldfish"
+                             "TheTechReportTR")
+      "List of channels where to search")
+
   (defun emacs-solo/show-yt-thumbnail ()
     "Show YouTube thumbnail from a videoId in the current buffer."
     (interactive)
@@ -199,6 +213,59 @@ P")
                  (forward-line 1))
                (message "YouTube search done.")
                (youtube-search--insert-results (nreverse results)))))))))
+
+  (defun youtube-get-channel-videos (channel &optional max-results)
+    "Retrieve the N most recent videos from a YouTube channel.
+CHANNEL is the channel username (e.g., \"LSVargas\" or \"@LinusTechTips\").
+MAX-RESULTS defaults to `youtube-search-max-results'.
+
+Uses the channel's /videos page to get videos in chronological order."
+    (interactive (list
+                  (completing-read "Choose channel: " my/yt-channels)
+                  (and current-prefix-arg
+                       (prefix-numeric-value current-prefix-arg))))
+    (let* ((buf (get-buffer-create "*YouTube Search Raw*"))
+           (max-results (or max-results youtube-search-max-results))
+           (channel-id (if (string-prefix-p "@" channel) channel (concat "@" channel)))
+           (channel-url (format "https://www.youtube.com/%s/videos" channel-id))
+           (print-format (concat
+                          "{"
+                          "\"title\": \"%(title)s\", "
+                          "\"duration_string\": \"%(duration_string)s\", "
+                          "\"upload_date\": \"%(upload_date)s\", "
+                          "\"uploader\": \"%(uploader)s\", "
+                          "\"thumbnail\": \"%(thumbnail)s\", "
+                          "\"url\": \"%(webpage_url)s\""
+                          "}")))
+      (with-current-buffer buf (erase-buffer))
+      (message "Fetching %d recent videos from %s..." max-results channel)
+      (make-process
+       :name "youtube-channel-videos"
+       :buffer buf
+       :command `("yt-dlp"
+                  ,channel-url
+                  "--max-downloads" ,(number-to-string max-results)
+                  "--print" ,print-format)
+       :sentinel
+       (lambda (p _e)
+         (when (eq (process-status p) 'exit)
+           (with-current-buffer (process-buffer p)
+             (goto-char (point-min))
+             (let (results)
+               (while (not (eobp))
+                 (let* ((line (string-trim (thing-at-point 'line t)))
+                        (obj (and (not (string-empty-p line))
+                                  (youtube-search--parse-line line))))
+                   (when obj
+                     ;; Convert thumbnail string to thumbnails array for compatibility
+                     (let ((thumb-url (alist-get 'thumbnail obj)))
+                       (when thumb-url
+                         (setf (alist-get 'thumbnails obj)
+                               (vector (list (cons 'url thumb-url))))))
+                     (push obj results)))
+                 (forward-line 1))
+               (message "Retrieved %d videos from %s." (length results) channel)
+               (youtube-search--insert-results results))))))))
 
   ;; Table UI
 
