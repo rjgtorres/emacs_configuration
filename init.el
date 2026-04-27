@@ -791,11 +791,11 @@ If ###@### is found, remove it and place point there at the end."
   (shr-image-animate t)
   :bind (:map
          eww-mode-map
-         ("=" text-scale-increase)
-         ("-" text-scale-decrease)
-         ("0" text-scale-adjust)
-         ("U" shr-copy-url)
-         ("I" my/eww-download-image-at-point)))
+         ("=" . text-scale-increase)
+         ("-" . text-scale-decrease)
+         ("0" . text-scale-adjust)
+         ("U" . shr-copy-url)
+         ("I" . my/eww-download-image-at-point)))
 
 (use-package image
   :ensure nil
