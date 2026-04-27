@@ -21,6 +21,8 @@
              ([remap apropos-command] . 'helm-apropos)     
              ([remap yank-pop] . 'helm-show-kill-ring)
              ([remap occur] . 'helm-occur)
+             ([remap recentf] . 'helm-recentf)
+             ([remap grep] . 'helm-do-grep-ag)
              ("C-x b" . helm-mini)
              ("C-x C-g" . helm-grep-do-git-grep))))
 
