@@ -824,6 +824,7 @@ If ###@### is found, remove it and place point there at the end."
 (require 'rdt-helm)
 (require 'rdt-casual)
 (require 'rdt-org)
+(require 'rdt-markdown)
 (require 'rdt-lsp)
 (require 'rdt-flycheck)
 (require 'rdt-completions)
