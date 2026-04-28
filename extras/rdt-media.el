@@ -59,6 +59,31 @@
     :defer t
     :config
     (ready-player-mode +1))
+
+  (use-package mpv
+    :ensure t
+    :defer t
+    :config
+    (defun mpv-url-no-video (url)
+      "Start an mpv process playing the sound of a video"
+      (interactive "sURL: ")
+      (unless (mpv--url-p url)
+        (user-error "Invalid argument: `%s' (must be a valid URL)" url))
+      (mpv-start "--vid=no" url))
+    (defvar-keymap mpv-command-map
+      :doc "Keymap for mpv functions"
+      "s"   #'mpv-start
+      "SPC" #'mpv-pause
+      "u"   #'mpv-play-url
+      "a"   #'mpv-url-no-video
+      "q"   #'mpv-quit
+      "n"   #'mpv-chapter-next
+      "p"   #'mpv-chapter-prev
+      "["   #'mpv-seed-decrease
+      "]"   #'mpv-seed-increase
+      "f"   #'mpv-seek-forward
+      "b"   #'mpv-seek-backward)
+    :bind-keymap ("C-c j" . mpv-command-map))
   
   (use-package pdf-tools
     :ensure t
