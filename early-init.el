@@ -32,6 +32,10 @@
 ;;   :type '(alist :key-type symbol :value-type (choice (const nil) string))
 ;;   :group 'emacs-solo)
 
+;; Load customizations as early as possible so user settings
+;; (e.g. emacs-solo-avoid-flash-options) take effect before they are used.
+(setq custom-file (locate-user-emacs-file "custom-vars.el"))
+(load custom-file 'noerror 'nomessage)
 
 ;;; -------------------- performance & HACKS
 ;; HACK: inscrease startup speed

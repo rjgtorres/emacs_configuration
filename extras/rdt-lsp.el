@@ -46,12 +46,17 @@
        'eglot-server-programs
        '((c++-ts-mode c-ts-mode c++-mode c-mode) . ("clangd" "-j=8" "--log=error" "--header-insertion=never"))))
 
-
     (with-eval-after-load 'eglot
       ;; install pip install fortran-language-server
       (add-to-list
        'eglot-server-programs
        '((f90-ts-mode f90-mode Fortran-mode) . ("fortls" "--nthreads=4"))))
+
+    (with-eval-after-load 'eglot
+      ;; install pip install basedpyright
+    (add-to-list 'eglot-server-programs
+                 '((python-mode python-ts-mode)
+                   "basedpyright-langserver" "--stdio")))
     
     :bind (:map
            eglot-mode-map

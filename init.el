@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+;;; configuration base on emacs-solo
+;;; https://github.com/LionyxML/emacs-solo/
+;;; last checked commit: https://github.com/LionyxML/emacs-solo/commit/7c17b4fdfbb3bb6703e418c17c0c6cf35d0b34e8
+;;; date of commit was 10/5/2026
+
 
 (use-package package
   :config
@@ -7,10 +12,15 @@
                '("melpa" . "https://melpa.org/packages/"))
   (package-initialize))
 
+(use-package modus-theme
+  :ensure t)
+
 (use-package use-package
   :custom
   (package-native-compile t)
   (warning-minimum-level :emergency))
+
+(load custom-file 'noerror 'nomessage)
 
 (use-package emacs
   :ensure nil
@@ -79,9 +89,11 @@
   (pixel-scroll-precision-mode t)
   (pixel-scroll-precision-use-momentum nil)
   (project-list-file (expand-file-name "cache/projects" user-emacs-directory))
-  (project-vc-extra-root-markers '("Cargo.toml" "package.json" "go.mod")) ; Excelent for mono repos with multiple langs, makes Eglot happy
+  (project-vc-extra-root-markers '("Cargo.toml" "package.json" "go.mod" "*.asd")) ; Excelent for mono repos with multiple langs, makes Eglot happy
   (ring-bell-function 'ignore)
   (read-answer-short t)
+  (read-process-output-max (* 4 1024 1024))
+  (redisplay-skip-fontification-on-input t)
   (recentf-max-saved-items 300) ; default is 20
   (recentf-max-menu-items 15)
   (recentf-auto-cleanup (if (daemonp) 300 'never))
@@ -122,6 +134,7 @@
   (use-file-dialog nil)
   (use-package-hook-name-suffix nil)
   (use-short-answers t)
+  (view-lossage-auto-refresh t)
   (visible-bell nil)
   (window-combination-resize t)
   (window-resize-pixelwise nil)
@@ -164,9 +177,6 @@
   (setq-default indent-tabs-mode nil)
   (put 'dired-find-alternate-file 'disabled nil)
   (electric-pair-mode t)
-  ;; Save manual customizations to other file than init.el
-  (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-  (load custom-file 'noerror 'nomessage)
 
   ;; Makes everything accept utf-8 as default, so buffers with tsx and so
   ;; won't ask for encoding (because undecided-unix) every single keystroke
@@ -234,6 +244,8 @@
   (set-display-table-slot standard-display-table 'vertical-border ?\u2502)
   (set-display-table-slot standard-display-table 'truncation ?\u2192)
 
+  (put 'narrow-to-region 'disabled nil)
+  
   ;; Ibuffer filters
   (setq ibuffer-saved-filter-groups
         '(("default"
@@ -316,37 +328,6 @@
   ;; Mute NPM loglevel so it wont interfer with other issued commands like grep
   (setenv "NPM_CONFIG_LOGLEVEL" "silent")
 
-  ;; Makes any xref buffer "exportable" to a grep buffer with "E" so you can edit it with "e".
-  (defun emacs-solo/xref-to-grep-compilation ()
-    "Export the current Xref results to a grep-like buffer (Emacs 30+)."
-    (interactive)
-    (unless (derived-mode-p 'xref--xref-buffer-mode)
-      (user-error "Not in an Xref buffer"))
-
-    (let* ((items (and (boundp 'xref--fetcher)
-                       (funcall xref--fetcher)))
-           (buf-name "*xref→grep*")
-           (grep-buf (get-buffer-create buf-name)))
-      (unless items
-        (user-error "No xref items found"))
-
-      (with-current-buffer grep-buf
-        (let ((inhibit-read-only t))
-          (erase-buffer)
-          (insert (format "-*- mode: grep; default-directory: %S -*-\n\n"
-                          default-directory))
-          (dolist (item items)
-            (let* ((loc (xref-item-location item))
-                   (file (xref-file-location-file loc))
-                   (line (xref-file-location-line loc))
-                   (summary (xref-item-summary item)))
-              (insert (format "%s:%d:%s\n" file line summary)))))
-        (grep-mode))
-      (pop-to-buffer grep-buf)))
-  (with-eval-after-load 'xref
-    (define-key xref--xref-buffer-mode-map (kbd "E")
-                #'emacs-solo/xref-to-grep-compilation))
-
   ;; ELISP evaluations show results in an overlay
   (defun emacs-solo/eval-last-sexp-overlay (arg)
     "Eval last sexp and show result inline as overlay.
@@ -374,6 +355,12 @@ Use ⇒ if displayable, otherwise fallback to =>."
               (let ((private-file (expand-file-name "private.el" user-emacs-directory)))
                 (when (file-exists-p private-file)
                   (load private-file)))))
+
+  ;; Recenter after save-place restore
+  ;; Reference: https://emacsredux.com/blog/2026/04/07/stealing-from-the-best-emacs-configs/
+  (advice-add 'save-place-find-file-hook :after
+              (lambda (&rest _)
+                (when buffer-file-name (ignore-errors (recenter)))))
 
   :init
 ;;   ;; Keep margins from automatic resizing
@@ -467,11 +454,21 @@ Use ⇒ if displayable, otherwise fallback to =>."
       (window-height . 0.25)
       (side . bottom)
       (slot . 1))
+     ("\\*inferior.*"
+      (display-buffer-in-side-window)
+      (window-height . 0.5)
+      (side . bottom)
+      (slot . 1))
      ("\\*\\(M3U Playlist\\)"
       (display-buffer-in-side-window)
       (window-height . 0.25)
       (side . bottom)
-      (slot . 3)))))
+      (slot . 3))
+     ("\\*vterm-fast\\*"
+      (display-buffer-in-side-window)
+      (window-height . 0.25)
+      (side . bottom)
+      (slot . 1)))))
 
 ;;; │ DIFF
 (use-package diff-mode
@@ -536,7 +533,7 @@ Use ⇒ if displayable, otherwise fallback to =>."
     "C-x 8 ^" "superscript (⁰, ¹, ², …)"
     "C-x 8 _" "subscript (₀, ₁, ₂, …)"
     "C-x 8 a" "arrows & æ (←, →, ↔, æ)"
-    "C-x 8 e" "emojis (🫎, 🇧🇷, 🇮🇹, …)"
+    "C-x 8 e" "emojis (🇵🇹, 🇩🇪, 😀, …)"
     "C-x 8 *" "common symbols ( , ¡, €, …)"
     "C-x 8 =" "macron (Ā, Ē, Ḡ, …)"
     "C-x 8 N" "macron (№)"
@@ -588,31 +585,98 @@ Use ⇒ if displayable, otherwise fallback to =>."
       "C-c C-v" "org-babel"
       "C-c C-x" "org-extra-commands")))
 
+;;; │ WEBJUMP
+(use-package webjump
+  :defer t
+  :ensure nil
+  :bind ("C-x /" . webjump)
+  :custom
+  (webjump-sites
+   '(("Amazon ES"      . [simple-query "https://www.amazon.es" "https://www.amazon.es/s?k=" ""])
+     ("Bertrand"       . [simple-query "https://www.bertrand.pt" "https://www.bertrand.pt/pesquisa/" ""])
+     ("DuckDuckAI"     . [simple-query "https://duck.ai" "https://duck.ai/?q=" ""])
+     ("DuckDuckGo"     . [simple-query "https://www.duckduckgo.com" "https://www.duckduckgo.com/?q=" ""])
+     ("Github"         . [simple-query "https://www.github.com/search?ref=simplesearch&q=" ""])
+     ("Google"         . [simple-query "https://www.google.com" "https://www.google.com/search?q=" ""])
+     ("IMDB" . [simple-query "www.imdb.com" "https://www.imdb.com/find/?s=tt&q=" ""])
+     ("Hyperspec"      . [simple-query "http://www.lispworks.com" "http://www.lispworks.com/cgi-bin/search.cgi?q=" "&t=-D_-HB-"])
+     ("Scryfall"       . [simple-query "https://scryfall.com" "https://scryfall.com/search?q=" ""])
+     ("Stack-overflow" . [simple-query "https://www.stackoverflow.com" "https://www.stackoverflow.com/search?q=" ""])
+     ("Wikipedia"      . [simple-query "https://wikipedia.org" "https://wikipedia.org/wiki/" ""])
+     ("Wook"           . [simple-query "https://www.wook.pt" "https://www.wook.pt/pesquisa?keyword=" ""])
+     ("YouTube"        . [simple-query "https://www.youtube.com/" "https://www.youtube.com/results?search_query=" ""]))))
+
+;;; │ SPEEDBAR
+;;
+(use-package speedbar
+  :ensure nil
+  :bind
+  (("M-I" . (lambda () ;; Toggles / focuses speedbar on side window
+              (interactive)
+              (speedbar-window)       ;; EMACS-31
+              (let ((win (get-buffer-window speedbar-buffer)))
+                (when win
+                  (select-window win))))))
+  :custom
+  (speedbar-window-default-width 25)  ;; EMACS-31
+  (speedbar-window-max-width 25)      ;; EMACS-31
+  (speedbar-show-unknown-files t)
+  (speedbar-directory-unshown-regexp "^$")
+  (speedbar-indentation-width 2)
+  (speedbar-use-images t)
+  (speedbar-update-flag nil)
+  :config
+  (setq speedbar-expand-image-button-alist
+        '(("<+>" . ezimage-directory) ;; previously ezimage-directory-plus
+          ("<->" . ezimage-directory-minus)
+          ("< >" . ezimage-directory)
+          ("[+]" . ezimage-page-plus)
+          ("[-]" . ezimage-page-minus)
+          ("[?]" . ezimage-page)
+          ("[ ]" . ezimage-page)
+          ("{+}" . ezimage-directory-plus) ;; previously ezimage-box-plus
+          ("{-}" . ezimage-directory-minus) ;; previously ezimage-box-minus
+          ("<M>" . ezimage-mail)
+          ("<d>" . ezimage-document-tag)
+          ("<i>" . ezimage-info-tag)
+          (" =>" . ezimage-tag)
+          (" +>" . ezimage-tag-gt)
+          (" ->" . ezimage-tag-v)
+          (">"   . ezimage-tag)
+          ("@"   . ezimage-tag-type)
+          ("  @" . ezimage-tag-type)
+          ("*"   . ezimage-checkout)
+          ("#"   . ezimage-object)
+          ("!"   . ezimage-object-out-of-date)
+          ("//"  . ezimage-label)
+          ("%"   . ezimage-lock)))) 
+
 (use-package treesit
   :when (and (fboundp 'treesit-available-p)
              (treesit-available-p))
   :config (setq treesit-font-lock-level 4)
-  :init
-  (setq treesit-language-source-alist
-        '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
-          (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
-          (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
-          (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
-          (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
-          (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
-          (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
-          (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
-          (f90        . ("https://github.com/stadelmanma/tree-sitter-fortran"))
-          (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
-          (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
-          (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
-          (make       . ("https://github.com/alemuller/tree-sitter-make"))
-          (markdown   . ("https://github.com/MDeiml/tree-sitter-markdown" nil "tree-sitter-markdown/src"))
-          (org        . ("https://github.com/milisims/tree-sitter-org"))
-          (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
-          (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
-          (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
-          (toml       . ("https://github.com/tree-sitter/tree-sitter-toml")))))
+  ;; :init
+  ;; (setq treesit-language-source-alist
+  ;;       '((bash       . ("https://github.com/tree-sitter/tree-sitter-bash"))
+  ;;         (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+  ;;         (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+  ;;         (css        . ("https://github.com/tree-sitter/tree-sitter-css"))
+  ;;         (cmake      . ("https://github.com/uyha/tree-sitter-cmake"))
+  ;;         (csharp     . ("https://github.com/tree-sitter/tree-sitter-c-sharp.git"))
+  ;;         (dockerfile . ("https://github.com/camdencheek/tree-sitter-dockerfile"))
+  ;;         (elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+  ;;         (f90        . ("https://github.com/stadelmanma/tree-sitter-fortran"))
+  ;;         (html       . ("https://github.com/tree-sitter/tree-sitter-html"))
+  ;;         (javascript . ("https://github.com/tree-sitter/tree-sitter-javascript"))
+  ;;         (json       . ("https://github.com/tree-sitter/tree-sitter-json"))
+  ;;         (make       . ("https://github.com/alemuller/tree-sitter-make"))
+  ;;         (markdown   . ("https://github.com/tree-sitter-grammars/tree-sitter-markdown"))
+  ;;         (org        . ("https://github.com/milisims/tree-sitter-org"))
+  ;;         (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+  ;;         (ruby       . ("https://github.com/tree-sitter/tree-sitter-ruby"))
+  ;;         (yaml       . ("https://github.com/ikatyang/tree-sitter-yaml"))
+  ;;         (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
+  )
 (add-to-list 'major-mode-remap-alist '(sh-mode         . bash-ts-mode))
 (add-to-list 'major-mode-remap-alist '(c-mode          . c-ts-mode))
 (add-to-list 'major-mode-remap-alist '(c++-mode        . c++-ts-mode))
@@ -625,6 +689,15 @@ Use ⇒ if displayable, otherwise fallback to =>."
 (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
 (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
 (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
+
+(use-package markdown-ts-mode
+  :ensure nil
+  :defer t)  ;; EMACS-31 this is now defined on mode code)
+
+(use-package c++-ts--mode
+  :ensure nil
+  :custom
+  (add-to-list 'treesit-language-source-alist '((cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp")))))
 
 ;;; │ Pretty symbols
 (defun my-add-pretty-list ()
@@ -665,7 +738,10 @@ Use ⇒ if displayable, otherwise fallback to =>."
   (ispell-hunspell-add-multi-dic "en_GB,pt_PT")
   (setq ispell-personal-dictionary "~/.hunspell_personal")
   (unless (file-exists-p ispell-personal-dictionary)
-    (write-region "" nil ispell-personal-dictionary nil 0)))
+    (write-region "" nil ispell-personal-dictionary nil 0))
+  :hook
+  (text-mode-hook . flyspell-mode)
+  (prog-mode-hook . flyspell-prog-mode))
 
 ;;
 ;;  A nice resource about it: https://www.rahuljuliato.com/posts/abbrev-mode
@@ -676,7 +752,7 @@ Use ⇒ if displayable, otherwise fallback to =>."
   (dolist (hook '(f90-ts-mode-hook
                   c++-ts--mode-hook
                   org-mode-hook
-                  markdown-mode-hook))
+                  markdown-ts-mode-hook))
     (add-hook hook #'abbrev-mode))
   :custom
   (save-abbrevs nil)
@@ -720,9 +796,9 @@ If ###@### is found, remove it and place point there at the end."
       ("mypoop" "💩")
       ("mypalm" "🤦‍♂️")
       ("mygrump" "😠")
-      
+
       ;; NerdFonts
-      ("nerdfolder" "")
+      ("nerdfolder" "")
       ("nerdgit" "")
       ("nerdemacs" "")
       ))
@@ -805,16 +881,20 @@ If ###@### is found, remove it and place point there at the end."
 
 ;;; │ Theme
 (message "loading theme")
-(add-to-list 'custom-theme-load-path (expand-file-name "moe-theme.el" user-emacs-directory))
-(add-to-list 'load-path (expand-file-name "moe-theme.el" user-emacs-directory))
-(use-package moe-theme
-  :ensure nil
+(use-package modus-themes
+  :ensure t
   :config
-  (use-package moe-theme-flavours
-    :ensure nil
-    :config
-    (moe-theme-flavour-darkmate)
-    (moe-theme-apply-color 'g/b)))
+  (modus-themes-include-derivatives-mode)
+  (setq modus-themes-mixed-fonts t)
+  (setq modus-themes-italic-constructs t))
+
+(use-package ef-themes
+  :ensure t
+  :defer t)
+
+(add-to-list 'custom-theme-load-path (expand-file-name "modus-darkmate-theme.el" user-emacs-directory))
+(load-theme 'modus-darkmate t)
+
 
 (add-to-list 'load-path (expand-file-name "extras" user-emacs-directory))
 (require 'emacs-solo-exec-path-from-shell)
@@ -824,14 +904,12 @@ If ###@### is found, remove it and place point there at the end."
 (require 'rdt-helm)
 (require 'rdt-casual)
 (require 'rdt-org)
-(require 'rdt-markdown)
 (require 'rdt-lsp)
 (require 'rdt-flycheck)
 (require 'rdt-completions)
 (require 'rdt-ai)
 (require 'rdt-common-lisp)
 (require 'rdt-misc)
-(require 'rdt-search-engines)
 (require 'rdt-media)
 (require 'emacs-solo-yt)
 (require 'emacs-solo-weather)
@@ -839,63 +917,4 @@ If ###@### is found, remove it and place point there at the end."
 (require 'rdt-rand-elisp)
 
 (message (emacs-init-time))
-
-
-;; todo remove this:
-
-;; (custom-set-variables
-;;  ;; custom-set-variables was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  '(custom-safe-themes
-;;    (quote
-;;     ("0feb7052df6cfc1733c1087d3876c26c66410e5f1337b039be44cb406b6187c6" "8290878d9ebe107ff0263dabf4f3e2255ee206484cd35c3afb11be86b0be7bf2" default)))
-;;  '(org-agenda-files (quote ("~/git/orgfiles/todo.org")))
-;;  '(package-selected-packages
-;;    (quote
-;;     (projectile command-log-mode multiple-cursors writeroom-mode engine-mode org-superstar hl-todo company rainbow-delimiters persistent-scratch all-the-icons-dired helm doom-modeline))))
-;; (custom-set-faces
-;;  ;; custom-set-faces was added by Custom.
-;;  ;; If you edit it by hand, you could mess it up, so be careful.
-;;  ;; Your init file should contain only one such instance.
-;;  ;; If there is more than one, they won't work right.
-;;  )
-
-;;   ;; Set repositories
-;;   (require 'package)
-;;   (setq-default
-;;    load-prefer-newer t
-;;    package-enable-at-startup nil)
-;;   (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/") t)
-;;   (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-;;   (package-initialize)
-
-;;   ;; Install dependencies
-;;   (unless (package-installed-p 'use-package)
-;;     (package-refresh-contents)
-;;     (package-install 'use-package t))
-;;   (setq-default
-;;    use-package-always-defer t)
-;; bootstrap straight
-;; (defvar bootstrap-version)
-;; (let ((bootstrap-file
-;;        (expand-file-name
-;;         "straight/repos/straight.el/bootstrap.el"
-;;         (or (bound-and-true-p straight-base-dir)
-;;             user-emacs-directory)))
-;;       (bootstrap-version 7))
-;;   (unless (file-exists-p bootstrap-file)
-;;     (with-current-buffer
-;;         (url-retrieve-synchronously
-;;          "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-;;          'silent 'inhibit-cookies)
-;;       (goto-char (point-max))
-;;       (eval-print-last-sexp)))
-;;   (load bootstrap-file nil 'nomessage))
-
-;; add use-package to use with straight
-;; (straight-use-package 'use-package)
-;; (straight-use-package 'org)
-;; (org-babel-load-file "~/.emacs.d/configs/generic_config.org")
 

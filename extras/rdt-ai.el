@@ -32,6 +32,14 @@
    (use-package agent-shell
      :vc (:url "https://github.com/xenodium/agent-shell"
                :rev :newest)
-     :after (shell-maker acp)))
+     :after (shell-maker acp)
+     :custom
+     (agent-shell-preferred-agent-config (agent-shell-github-make-copilot-config))
+     (agent-shell-github-default-model-id "gpt-4.1")
+     (agent-shell-github-default-session-mode-id "https://agentclientprotocol.com/protocol/session-modes#plan")
+     :bind (:map agent-shell-mode-map
+              ("RET" . newline)
+              ("M-RET" . shell-maker-submit)))
+   )
 
  (provide 'rdt-ai)

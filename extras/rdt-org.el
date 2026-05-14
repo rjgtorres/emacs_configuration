@@ -97,7 +97,9 @@
 
   
   (use-package helm-org
-    :ensure t)
+    :ensure t
+    :custom
+    (org-startup-with-inline-images t))
   (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
   (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags-command . helm-org-completing-read-tags))
 
@@ -123,7 +125,19 @@
   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
   (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch)
-  (setq org-startup-with-inline-images t)
+
+  (use-package logos
+    :ensure t
+    ;; :defer t
+    :custom
+    (logos-outlines-are-pages t)
+    :bind (([remap narrow-to-region] . 'logos-narrow-dwim)
+           ([remap forward-page] . 'logos-forward-page-dwim)
+           ([remap backward-page] . 'logos-backward-page-dwim)
+           ([remap markdown-forward-page] . 'logos-forward-page-dwim)
+           ([remap markdown-backward-page] . 'logos-backward-page-dwim)))
+
+
 
   ;; (use-package org-superstar
   ;;   :ensure t

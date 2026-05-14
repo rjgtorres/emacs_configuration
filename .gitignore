@@ -15,6 +15,7 @@
 !gendoxy.el
 !snippets/**
 !elfeed.org
+!cache/bookmarks
 
 !extras/**
 /.agent-shell/

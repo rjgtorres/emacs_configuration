@@ -32,20 +32,31 @@
     (writeroom-mode-hook . my/writeroom_configs))
 
   (use-package vterm
-    :ensure t)
+    :ensure t
+    :config
+    (defun my/vterm-fast ()
+      (interactive)
+      (let ((vterm-name "*vterm-fast*"))
+        (if (equal (buffer-name) vterm-name)
+            (bury-buffer)
+          (if (get-buffer vterm-name)
+              (switch-to-buffer vterm-name)
+            (vterm vterm-name)))))
+    :bind (("C-c t" . 'my/vterm-fast)))
   )
 
 (use-package osm
   :ensure t
-  :bind ("C-c m" . osm-prefix-map) ;; Alternatives: `osm-home' or `osm'
-
+  :defer
+  :bind ("C-c n" . osm-prefix-map) ;; Alternatives: `osm-home' or `osm'
+  :init
+  (sunrise-sunset)
   :custom
   ;; Take a look at the customization group `osm' for more options.
   (osm-default-server 'default) ;; Configure the tile server
   (osm-default-zoom 15)         ;; Default zoom level
   (osm-copyright nil)             ;; Display the copyright information
   (osm-home (list calendar-latitude calendar-longitude 10))       ;; Home, configure `calendar-latitude/longitude' instead
-  :config
   ;; (osm-add-server 'cycletravel
   ;;   :name "Cycle.travel"
   ;;   :description "The best cycling planing app"
@@ -55,7 +66,7 @@
   ;;   :name "My tile server"
   ;;   :group "Custom"
   ;;   :description "Tiles based on aerial images"
-  ;;   :url "https://myserver/tiles/%z/%x/%y.png?apikey=%k")
-)
+  ;;   :url "https://myserver/tiles/%z/%x/%y.png?apikey=%k"))
+(add-hook 'osm-mode-hook (lambda () (visual-line-mode -1)))
 
 (provide 'rdt-misc)

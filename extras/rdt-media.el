@@ -72,15 +72,16 @@
       (mpv-start "--vid=no" url))
     (defvar-keymap mpv-command-map
       :doc "Keymap for mpv functions"
-      "s"   #'mpv-start
+      :repeat t
+      "s"   #'mpv-play
       "SPC" #'mpv-pause
       "u"   #'mpv-play-url
       "a"   #'mpv-url-no-video
       "q"   #'mpv-quit
       "n"   #'mpv-chapter-next
       "p"   #'mpv-chapter-prev
-      "["   #'mpv-seed-decrease
-      "]"   #'mpv-seed-increase
+      "["   #'mpv-speed-decrease
+      "]"   #'mpv-speed-increase
       "f"   #'mpv-seek-forward
       "b"   #'mpv-seek-backward)
     :bind-keymap ("C-c j" . mpv-command-map))
